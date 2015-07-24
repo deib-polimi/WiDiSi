@@ -45,6 +45,7 @@ import wifidirect.p2pcore.wifiP2pService;
 // TODO: Auto-generated Javadoc
 /**
  * The Class newApplication.
+ * It should be set in the configuration file as well like any other protocol
  */
 public class newApplication implements EDProtocol, PeerListListener, CDProtocol, ConnectionInfoListener, 
 GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, BroadcastReceiver, Callback{
