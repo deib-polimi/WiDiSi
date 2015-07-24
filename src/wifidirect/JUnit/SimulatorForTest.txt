@@ -1,0 +1,338 @@
+########### Simulation parameters ######################
+########################################################
+random.seed 		1234567890
+network.size 		100
+
+# 1 means YES and 0 means NO
+Visualize_Groups 	1
+
+######Simulation.endtime could be the number of cycles for controls
+simulation.endtime 	4000
+simulation.logtime 	1
+
+###########  the duration of each Cycle in milliseconds
+CycleLenght 		100
+
+########### Field length in meter (Max X and Max Y)
+FieldLength 		1000.0
+
+########### Max and Min speen in metter per second and radio range in meter
+SpeedMx 			5
+SpeedMn 			0
+Radio 				200.0
+
+########### initial Ghephi Node size (huristic calculation)
+gephiSize 			(FieldLength/20)
+
+########### Normalazied Radio Range - a double between 0 to 1
+RANGE 				(Radio/FieldLength)
+
+#Network Dynamic
+MIN_NET_SIZE 		80
+MAX_NET_SIZE 		150
+NET_ADD_STEP 		1
+SIN_PERIOD 			100000
+NET_ADD_CYCLE_START 1
+NET_ADD_CYCLE_END 	simulation.endtime
+MAX_SPEED 			(SpeedMx*10*CycleLenght)/FieldLength
+MIN_SPEED 			(SpeedMn*10*CycleLenght)/FieldLength
+
+#Delay Identifiers
+Zero_Delay 					0
+Device_Discovery_Delay  	1
+Service_Discovery_Delay 	2
+Message_Delivery_Delay  	3
+Group_Invitation_Delay    	4
+Internal_Processing_Delay 	5
+
+####### this number of cycles here should be equal to 15 seconds which are necessary for group formation
+COEF15 				(15000/CycleLenght)
+
+########### wiring initializer #########################
+########################################################
+init.rnd wifidirect.nodemovement.WireInetTopology
+{
+	protocol 		lnk
+	coord_protocol 	intcord
+	undirected 		true
+	radio_range 	RANGE
+}
+
+########### cordination initializer ####################
+######################################################## 
+init.initcord CoordinateInitializer
+{
+	protocol 		intcord
+}
+ 
+############## Node P2P info  ##########################
+########################################################
+
+########### Node info initializer
+init.initnode nodeInitializer
+{
+	protocol_1 		nodinf
+	protocol_3 		p2pmanager
+	protocol_4 		test1
+}
+########### Node Info Observer
+#control.neighObs nodeInfoObs
+#control.neighObs.protocol lnk
+#control.neighObs.infoprotocol nodinf
+#control.neighObs.transport utr1
+#control.neighObs.listeners lst
+#control.neighObs.cordprotocol intcord
+#control.neighObs.step 1
+
+########### P2P Node information protocol
+protocol.nodinf nodeP2pInfo
+{
+	linkable 		lnk
+	transport5 		tr5
+	transport2 		utr2
+	transport1 		utr1
+	listeners 		lst
+}
+
+########################################################
+########################################################
+
+########### Proximity Observer #########################
+########################################################
+protocol.proob ProximityObserver
+{
+	linkable 		lnk
+	transport0		tr0
+	transport1		utr1
+	transport2		utr2
+	listeners		lst
+	p2pmanager		p2pmanager
+	p2pinfo			nodinf
+	15sec			COEF15
+	step			1
+}
+
+########### Network Visualizer #########################
+########################################################
+control.viz Visualizer
+{
+	newapp 			test1
+	transport 		utr1
+	p2pinfo 		nodinf
+	linkable 		lnk
+	p2pmanager 		p2pmanager
+	application		test1
+	coord 			intcord
+	cyclelen		CycleLenght
+	fieldlen		FieldLength
+	gephisize		gephiSize
+	maxspeed		SpeedMx
+	minspeed		SpeedMn
+	showgroups		Visualize_Groups
+	step 			1
+}
+
+control.vioch ViolationChecker
+{
+	p2pinfo			nodinf
+	linkable		lnk
+	listeners		lst
+	p2pmanager		p2pmanager
+	step 			1
+}
+
+control.sDev sDeviation
+{
+	application		test1
+	step 			1
+}
+
+########### Ordering the controls execution ############
+order.init 		initnode, initcord, rnd
+order.control 	dnet, move, viz, sDev, vioch
+
+########### Cordinates Keeper protocol ####################
+
+protocol.intcord CoordinateKeeper
+
+########### Linkable protocol ##########################
+########################################################
+protocol.lnk NeighborList
+{
+	capacity 		10
+}
+
+########### Listeners List protocol ####################
+########################################################
+protocol.lst eventListeners
+{
+	transport2 		utr2
+	Linkable 		lnk
+	p2pmanager 		p2pmanager
+	p2pinfo 		nodinf
+}
+
+########### WiFi P2P Manager protocol ##################
+########################################################
+protocol.p2pmanager WifiP2pManager
+{
+	linkable 		lnk
+	transport0 		tr0
+	transport1 		utr1
+	transport2 		utr2
+	transport3 		utr3
+	transport4 		utr4
+	transport5 		tr5
+	listeners 		lst
+	p2pinfo 		nodinf
+}
+
+########### test application protocol for events #######
+########################################################
+protocol.test1 newApplication
+{
+	p2pmanager 		p2pmanager
+	p2pinfo 		nodinf
+	step 			1
+}
+
+########### CDScheduler on EDSimulator #################
+########################################################
+init.sch CDScheduler
+init.sch.protocol test1 proob
+init.sch.randstart
+
+########### Control Dynamism  ##########################
+########################################################
+#control.dnet DynamicNetwork
+control.dnet OscillatingNetwork
+{
+#	add 		NET_ADD_STEP
+	minsize 	MIN_NET_SIZE
+	maxsize 	MAX_NET_SIZE
+	period		SIN_PERIOD
+#	from 		NET_ADD_CYCLE_START
+#	until 		NET_ADD_CYCLE_end
+	step 		1
+################ Node initializer after adding #########
+	init.0 		CoordinateInitializer
+	{
+		protocol 		intcord
+	}
+	
+	init.1 		RandNImodified
+	{
+		protocol 		lnk
+		coord_protocol 	intcord
+		radio_range 	RANGE
+		protocol 		lnk
+		undirected 		true
+		coord_protocol 	intcord
+	}
+
+	init.2 		nodeInitializer
+	{
+		protocol_1 		nodinf
+		protocol_2 		lnk
+		protocol_3 		p2pmanager
+		protocol_4 		test1
+	}
+	
+	init.3		CDScheduler
+	{
+		protocol 		test1 proob
+		
+	}
+	
+}
+########## Node Movement ##################################
+control.move NodeMovement
+{
+	linkable 		lnk
+	p2pinfo 		nodinf
+	p2pmanager 		p2pmanager
+	coord 			intcord
+	radio_range 	RANGE
+	node_speed_max 	MAX_SPEED
+	node_speed_min 	MIN_SPEED
+	step 			1
+}
+
+########### transport protocol #########################
+# each delay will be modeled by a specific transport
+# with specific configuration
+# we need 8 different configuratin 
+########################################################
+protocol.llmodel LLModel
+{
+	coordinate		intcord
+	cycleLength		CycleLenght
+}
+
+############ Zero Delay - Zero Drop Rate #####################
+protocol.tr0 UniformRandomTransportModified
+{
+	delaytype		Zero_Delay
+	lowlayermodel	llmodel
+	error			0
+}
+
+############ Device Discovery Delay ####################
+protocol.tr1 UniformRandomTransportModified
+{
+	delaytype		Device_Discovery_Delay
+	lowlayermodel	llmodel
+	error			0.1
+}
+protocol.utr1 UnreliableTransportModified
+{
+	transport 		tr1
+	lowlayermodel	llmodel
+}
+
+############ Service Discovery Delay ####################
+protocol.tr2 UniformRandomTransportModified
+{
+	delaytype		Service_Discovery_Delay
+	lowlayermodel	llmodel
+	error			0.1
+}
+protocol.utr2 UnreliableTransportModified
+{
+	transport 		tr2
+	lowlayermodel	llmodel
+}
+
+############ Message Delivery Delay #####################
+protocol.tr3 UniformRandomTransportModified
+{
+	delaytype		Message_Delivery_Delay
+	lowlayermodel	llmodel
+	error			0.1
+}
+protocol.utr3 UnreliableTransportModified
+{
+	transport 		tr3
+	lowlayermodel	llmodel
+}
+
+############ Group Invitation Delay #####################
+protocol.tr4 UniformRandomTransportModified
+{
+	delaytype		Group_Invitation_Delay
+	lowlayermodel	llmodel
+	error			0.1
+}
+protocol.utr4 UnreliableTransportModified
+{
+	transport 		tr4
+	lowlayermodel	llmodel
+}
+
+############ Internal Processing Delay #####################
+protocol.tr5 UniformRandomTransportModified
+{
+	delaytype		Internal_Processing_Delay
+	lowlayermodel	llmodel
+	error			0.1
+}
