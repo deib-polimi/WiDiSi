@@ -1,5 +1,5 @@
 /*
- * 
+ * Unit test class for EventListeners
  */
 package wifidirect.JUnit;
 
