@@ -19,9 +19,6 @@
 package wifidirect.JUnit;
 
 import java.io.*;
-
-import org.apache.commons.io.FileUtils;
-
 import peersim.cdsim.*;
 import peersim.config.*;
 import peersim.core.*;
@@ -153,22 +150,11 @@ public static int getSimID() {
 */
 public static void main(String[] args)
 {
-	File directory = new File("E:\\Polimi\\adt-bundle-windows-x86_64-20140702\\PeerSimSource\\log");
-	try {
-		FileUtils.cleanDirectory(directory);
-	} catch (IOException e2) {
-		// TODO Auto-generated catch block
-		e2.printStackTrace();
-	} 
+	
 	long time = System.currentTimeMillis();	
 	
 	System.err.println("Simulator: loading configuration");
-	try {
-		Configuration.setConfig( new ParsedProperties("E:\\Polimi\\adt-bundle-windows-x86_64-20140702\\PeerSimSource\\src\\peersim\\wifidirect\\JUnit\\SimulatorForTest.txt") );
-	} catch (IOException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	}
+	Configuration.setConfig( new ParsedProperties(args));
 
 	PrintStream newout =
 		(PrintStream)Configuration.getInstance(PAR_REDIRECT,System.out);

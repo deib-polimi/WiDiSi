@@ -14,6 +14,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
+ *	Source: PeerSim Project
+ *	Modified By: Naser Derakhshan
+ *	Politecnico di Milano
  */
 
 package wifidirect.p2pcore;
