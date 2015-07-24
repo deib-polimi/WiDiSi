@@ -28,6 +28,7 @@ import peersim.core.*;
 import peersim.edsim.*;
 
 
+// TODO: Auto-generated Javadoc
 /**
 * This is the main entry point to peersim. This class loads configuration and
 * detects the simulation type. According to this, it invokes the appropriate
@@ -53,16 +54,16 @@ public class Simulator {
 // ========================== static constants ==========================
 // ======================================================================
 
-/** {@link CDSimulator} */
+/**  {@link CDSimulator}. */
 public static final int CDSIM = 0;
 
-/** {@link EDSimulator} */
+/**  {@link EDSimulator}. */
 public static final int EDSIM = 1;
 
-/** Unknown simulator */
+/**  Unknown simulator. */
 public static final int UNKNOWN = -1;
 
-/** the class names of simulators used */
+/**  the class names of simulators used. */
 protected static final String[] simName = {
 	"peersim.cdsim.CDSimulator",
 	"peersim.edsim.EDSimulator",
@@ -87,16 +88,18 @@ public static final String PAR_REDIRECT = "simulation.stdout";
 // ==================== static fields ===================================
 // ======================================================================
 
-/** */
+/** The sim id. */
 private static int simID = UNKNOWN;
 
 //========================== methods ===================================
 //======================================================================
 
 /**
-* Returns the numeric id of the simulator to invoke. At the moment this can
-* be {@link #CDSIM}, {@link #EDSIM} or {@link #UNKNOWN}.
-*/
+ * Returns the numeric id of the simulator to invoke. At the moment this can
+ * be {@link #CDSIM}, {@link #EDSIM} or {@link #UNKNOWN}.
+ *
+ * @return the sim id
+ */
 public static int getSimID() {
 	
 	if (simID == UNKNOWN) {

@@ -26,6 +26,7 @@ import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.core.Protocol;
 
+// TODO: Auto-generated Javadoc
 /**
  * A protocol that stores links. It does nothing apart from that.
  * It is useful to model a static link-structure
@@ -39,9 +40,7 @@ public class NeighborList implements Protocol, Linkable
 // Parameters
 // --------------------------------------------------------------------------
 
-/**
- * Default init capacity
- */
+/** Default init capacity. */
 private static final int DEFAULT_INITIAL_CAPACITY = 10;
 
 /**
@@ -54,16 +53,21 @@ private static final String PAR_INITCAP = "capacity";
 // Fields
 // --------------------------------------------------------------------------
 
-/** Neighbors */
+/**  Neighbors. */
 protected Node[] neighbors;
 
-/** Actual number of neighbors in the array */
+/**  Actual number of neighbors in the array. */
 protected int len;
 
 // --------------------------------------------------------------------------
 // Initialization
 // --------------------------------------------------------------------------
 
+/**
+ * Instantiates a new neighbor list.
+ *
+ * @param s the s
+ */
 public NeighborList(String s)
 {
 	neighbors = new Node[Configuration.getInt(s + "." + PAR_INITCAP,
@@ -73,6 +77,9 @@ public NeighborList(String s)
 
 //--------------------------------------------------------------------------
 
+/* (non-Javadoc)
+ * @see java.lang.Object#clone()
+ */
 public Object clone()
 {
 	NeighborList ip = null;
@@ -88,6 +95,9 @@ public Object clone()
 // Methods
 // --------------------------------------------------------------------------
 
+/* (non-Javadoc)
+ * @see peersim.core.Linkable#contains(peersim.core.Node)
+ */
 public boolean contains(Node n)
 {
 	for (int i = 0; i < len; i++) {
@@ -99,8 +109,13 @@ public boolean contains(Node n)
 
 // --------------------------------------------------------------------------
 
-/** Adds given node if it is not already in the network. There is no limit
-* to the number of nodes that can be added. */
+/**
+ *  Adds given node if it is not already in the network. There is no limit
+ * to the number of nodes that can be added.
+ *
+ * @param n the n
+ * @return true, if successful
+ */
 public boolean addNeighbor(Node n)
 {
 	for (int i = 0; i < len; i++) {
@@ -119,6 +134,9 @@ public boolean addNeighbor(Node n)
 
 // --------------------------------------------------------------------------
 
+/* (non-Javadoc)
+ * @see peersim.core.Linkable#getNeighbor(int)
+ */
 public Node getNeighbor(int i)
 {
 	return neighbors[i];
@@ -126,6 +144,9 @@ public Node getNeighbor(int i)
 
 // --------------------------------------------------------------------------
 
+/* (non-Javadoc)
+ * @see peersim.core.Linkable#degree()
+ */
 public int degree()
 {
 	return len;
@@ -133,6 +154,9 @@ public int degree()
 
 // --------------------------------------------------------------------------
 
+/* (non-Javadoc)
+ * @see peersim.core.Linkable#pack()
+ */
 public void pack()
 {
 	if (len == neighbors.length)
@@ -144,6 +168,9 @@ public void pack()
 
 // --------------------------------------------------------------------------
 
+/* (non-Javadoc)
+ * @see java.lang.Object#toString()
+ */
 public String toString()
 {
 	if( neighbors == null ) return "DEAD!";
@@ -157,6 +184,9 @@ public String toString()
 
 // --------------------------------------------------------------------------
 
+/* (non-Javadoc)
+ * @see peersim.core.Cleanable#onKill()
+ */
 public void onKill()
 {
 	neighbors = new Node[DEFAULT_INITIAL_CAPACITY];

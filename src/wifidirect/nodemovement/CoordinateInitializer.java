@@ -29,6 +29,10 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.dynamics.NodeInitializer;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CoordinateInitializer.
+ */
 public class CoordinateInitializer implements Control, NodeInitializer {
     // ------------------------------------------------------------------------
     // Parameters
@@ -91,6 +95,9 @@ public class CoordinateInitializer implements Control, NodeInitializer {
         return false;
     }
 
+	/* (non-Javadoc)
+	 * @see peersim.dynamics.NodeInitializer#initialize(peersim.core.Node)
+	 */
 	@Override
 	public void initialize(Node n) {
 		// TODO Auto-generated method stub

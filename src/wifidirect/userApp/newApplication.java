@@ -104,7 +104,11 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 	/** The value. */
 	public double value = 0;
 	
-	/** The this node. */
+	/**
+	 *  The this node.
+	 *
+	 * @param prefix the prefix
+	 */
 	//private Node thisNode=null;
 
 	/**
