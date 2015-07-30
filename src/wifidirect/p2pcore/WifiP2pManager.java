@@ -39,69 +39,69 @@ import peersim.transport.Transport;
 public class WifiP2pManager implements EDProtocol{
 
 	/** The Constant CONNECTED. */
-	public static final int CONNECTED   = 0;
+	private static final int CONNECTED   = 0;
 	
 	/** The Constant INVITED. */
-	public static final int INVITED     = 1;
+	private static final int INVITED     = 1;
 	
 	/** The Constant FAILED. */
-	public static final int FAILED      = 2;
+	private static final int FAILED      = 2;
 	
 	/** The Constant AVAILABLE. */
-	public static final int AVAILABLE   = 3;
+	private static final int AVAILABLE   = 3;
 	
 	/** The Constant UNAVAILABLE. */
-	public static final int UNAVAILABLE = 4;
+	private static final int UNAVAILABLE = 4;
 
 	/** The Constant PAR_LISTENER. */
-	public static final String PAR_LISTENER = "listeners"; /**  eventDetection protocol for event-based simulation *. */
-	public static final String PAR_PROTOCOL = "linkable";
+	private static final String PAR_LISTENER = "listeners"; /**  eventDetection protocol for event-based simulation *. */
+	private static final String PAR_PROTOCOL = "linkable";
 	
 	/** The Constant PAR_P2PINFO. */
-	public static final String PAR_P2PINFO 	= "p2pinfo";	  /**  P2PInfo protocol for event-based simulation *. */
-	public static final String PAR_TRASP0 	= "transport0"; // Zero delay Zero Drop Rate
+	private static final String PAR_P2PINFO 	= "p2pinfo";	  /**  P2PInfo protocol for event-based simulation *. */
+	private static final String PAR_TRASP0 	= "transport0"; // Zero delay Zero Drop Rate
 	
 	/** The Constant PAR_TRASP1. */
-	public static final String PAR_TRASP1 	= "transport1"; // Peer Discovery and so on
+	private static final String PAR_TRASP1 	= "transport1"; // Peer Discovery and so on
 	
 	/** The Constant PAR_TRASP2. */
-	public static final String PAR_TRASP2 	= "transport2"; // Service Discovery and so on
+	private static final String PAR_TRASP2 	= "transport2"; // Service Discovery and so on
 	
 	/** The Constant PAR_TRASP3. */
-	public static final String PAR_TRASP3 	= "transport3"; // Socket Message Delivery
+	private static final String PAR_TRASP3 	= "transport3"; // Socket Message Delivery
 	
 	/** The Constant PAR_TRASP4. */
-	public static final String PAR_TRASP4 	= "transport4"; // Group Invitation
+	private static final String PAR_TRASP4 	= "transport4"; // Group Invitation
 	
 	/** The Constant PAR_TRASP5. */
-	public static final String PAR_TRASP5 	= "transport5"; // Internal delivery
+	private static final String PAR_TRASP5 	= "transport5"; // Internal delivery
 
 	/** The transport id0. */
-	public int transportId0;
+	private int transportId0;
 	
 	/** The transport id1. */
-	public int transportId1;
+	private int transportId1;
 	
 	/** The transport id2. */
-	public int transportId2;
+	private int transportId2;
 	
 	/** The transport id3. */
-	public int transportId3;
+	private int transportId3;
 	
 	/** The transport id4. */
-	public int transportId4;
+	private int transportId4;
 	
 	/** The transport id5. */
-	public int transportId5;
+	private int transportId5;
 	
 	/** The linkable id. */
-	public int linkableId;
+	private int linkableId;
 	
 	/** The listener pid. */
-	public int listenerPid;
+	private int listenerPid;
 	
 	/** The p2p info pid. */
-	public int p2pInfoPid;
+	private int p2pInfoPid;
 
 	/** The this node. */
 	public Node thisNode = Network.get(CommonState.r.nextInt(Network.size()));  // initiate with some node just to avoid "if (thisNode!=null)"
@@ -128,9 +128,9 @@ public class WifiP2pManager implements EDProtocol{
 		listenerPid  = Configuration.getPid(prefix + "." + PAR_LISTENER);
 	}
 
-	// Valid for Autonamous Group formation Only!!!
-	/* (non-Javadoc)
+	/** (non-Javadoc)
 	 * @see peersim.edsim.EDProtocol#processEvent(peersim.core.Node, int, java.lang.Object)
+	 * This method will be called by event-driven engine whenever an event is available for a particular Protocol ({@value pid}) in a specific Node ({@value node}) in the network. This method has to be public; however, an application must not call this method since it is an internal method for the simulator.
 	 */
 	@Override
 	public void processEvent(Node node, int pid, Object event) {
@@ -355,7 +355,7 @@ public class WifiP2pManager implements EDProtocol{
 	}
 
 	/**
-	 * The Interface Callback.
+	 * The Interface Callback. This Interface will be used by the sockets to deliver messages
 	 */
 	public interface Callback extends EventListener {
 		
@@ -369,6 +369,7 @@ public class WifiP2pManager implements EDProtocol{
 
 	/**
 	 * Register handler.
+	 * Should be called by any class that implements Callback interface
 	 *
 	 * @param callback the callback
 	 */
@@ -377,14 +378,15 @@ public class WifiP2pManager implements EDProtocol{
 	}
 	/**
 	 *  Interface for callback invocation when peer list is changed.
+	 *  This interface should be implemented by any class which are eager to receive call back information whenever PeerList has been updated. The class is needed to register by invoking {@link registerPeerListener}
 	 *
 	 * @see PeerListEvent
 	 */
 	public interface PeerListListener extends EventListener{
 
 		/**
-		 * We only inform that the peer list changed. the application itself read the new peer list by 
-		 * calling linkable protocol
+		 * Whenever the PeerList has changed, the application will receive the list of new Peers in {@link WifiP2pDeviceList} format 
+		 * via the this method. This would be an Asynchronous call.
 		 *
 		 * @param peers the peers
 		 */
@@ -392,7 +394,7 @@ public class WifiP2pManager implements EDProtocol{
 	}
 
 	/**
-	 * Register peer listener.
+	 * Register peer listener. Before an application is able to receive callback messages for new available peers, it should register itself by invoking this method. If the same class imlements the {@link PeerListListener}, the application should pass "this" as the obj to the {@link registerPeerListener (PeerListListener obj)}.
 	 *
 	 * @param obj the obj
 	 */
@@ -403,6 +405,7 @@ public class WifiP2pManager implements EDProtocol{
 
 	/**
 	 *  Interface for callback invocation when connection info is available.
+	 *  Before an application is able to receive callback messages for new changes in the connection, it should register itself by invoking this method. If the same class imlements the {@link PeerListListener}, the application should pass "this" as the obj to the {@link registerPeerListener (PeerListListener obj)}.
 	 *
 	 * @see ConnectionInfoEvent
 	 */
@@ -417,7 +420,8 @@ public class WifiP2pManager implements EDProtocol{
 	}
 
 	/**
-	 * Register con info listener.
+	 * Register connection info listener.
+	 * This method should be called to register a listener for receiving events regarding the WiFi P2P Connection Info
 	 *
 	 * @param obj the obj
 	 */
@@ -454,7 +458,7 @@ public class WifiP2pManager implements EDProtocol{
 	}
 
 	/**
-	 * Register dns sd response listeners.
+	 * Register DNS Service discovery response listeners.
 	 *
 	 * @param obj the obj
 	 */
@@ -466,7 +470,7 @@ public class WifiP2pManager implements EDProtocol{
 
 
 	/**
-	 * Register dns sd txt record listener.
+	 * Register DNS Service Discovery text record listener.
 	 *
 	 * @param obj the obj
 	 */
@@ -477,7 +481,7 @@ public class WifiP2pManager implements EDProtocol{
 	}
 
 	/**
-	 * Register broadcast receiver.
+	 * Register broadcast receiver. 
 	 *
 	 * @param receiver the receiver
 	 */
@@ -488,7 +492,7 @@ public class WifiP2pManager implements EDProtocol{
 	}
 
 	/**
-	 * Un register broadcast receiver.
+	 * Unregister broadcast receiver.
 	 *
 	 * @param receiver the receiver
 	 */
@@ -541,6 +545,8 @@ public class WifiP2pManager implements EDProtocol{
 
 	/**
 	 * Discover peers.
+	 * As Android rules suggests: the discovery will continue as long as the connection is established or the user manually stop peer discovery
+	 * The Peer Discovery of Group Owner will never stop.
 	 */
 	public void discoverPeers() {
 		nodeP2pInfo nodeInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
@@ -549,6 +555,7 @@ public class WifiP2pManager implements EDProtocol{
 
 	/**
 	 * Stop peer discovery.
+	 * @see discoverPeers()
 	 */
 	public void stopPeerDiscovery() {
 		nodeP2pInfo nodeInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
@@ -558,6 +565,8 @@ public class WifiP2pManager implements EDProtocol{
 
 	/**
 	 * Connect.
+	 * After peers have been discovered, the device can connect to another device by passing the MacAddress of the other device to this method.
+	 * The Mac address of the other device are the {@link Node} ID in WiDiSi
 	 *
 	 * @param MacAddress the mac address
 	 */
@@ -595,7 +604,7 @@ public class WifiP2pManager implements EDProtocol{
 	}
 
 	/**
-	 * Cancel connect.
+	 * Cancel connect. In case if group owner, calling this method would result in group termination.
 	 */
 	public void cancelConnect() {
 		nodeP2pInfo nodeInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
@@ -627,7 +636,7 @@ public class WifiP2pManager implements EDProtocol{
 	}
 
 	/**
-	 * Creates the group.
+	 * Creates the group. 
 	 */
 	public void createGroup() {
 		nodeP2pInfo nodeInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
@@ -642,16 +651,15 @@ public class WifiP2pManager implements EDProtocol{
 	}
 
 	/**
-	 * Removes the group.
+	 * Removes the group. The effect of removing group is the same as cancelling a connection. 
 	 */
 	public void removeGroup() {
 		cancelConnect();
 	}
 
-	// by calling this method and passing a service to it, it will add the service
-	// to the serviceList in nodeP2pInfo class. It will return immidiately
 	/**
 	 * Adds the local service.
+	 * by calling this method and passing a service to it, it will add the service to the serviceList in nodeP2pInfo class. It will return immidiately
 	 *
 	 * @param service the service
 	 */

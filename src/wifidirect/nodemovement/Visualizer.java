@@ -122,79 +122,79 @@ public class Visualizer implements Control{
 	public static final int UNAVAILABLE = 4;
 
 	/** The Constant PAR_COORD. */
-	public static final String PAR_COORD = "coord";
+	private static final String PAR_COORD = "coord";
 	
 	/** The Constant PAR_PROTOCOL. */
-	public static final String PAR_PROTOCOL = "newapp";
+	private static final String PAR_PROTOCOL = "newapp";
 	
 	/** The Constant PAR_MANAGE. */
-	public static final String PAR_MANAGE = "p2pmanager";
+	private static final String PAR_MANAGE = "p2pmanager";
 	
 	/** The Constant PAR_LINKABLE. */
-	public static final String PAR_LINKABLE = "linkable";
+	private static final String PAR_LINKABLE = "linkable";
 	
 	/** The Constant PAR_APPLICATION. */
-	public static final String PAR_APPLICATION = "application";
+	private static final String PAR_APPLICATION = "application";
 	
 	/** The Constant PAR_P2PINFO. */
-	public static final String PAR_P2PINFO = "p2pinfo";
+	private static final String PAR_P2PINFO = "p2pinfo";
 	
 	/** The Constant PAR_TRASP. */
-	public static final String PAR_TRASP = "transport";
+	private static final String PAR_TRASP = "transport";
 	
 	/** The Constant PAR_CYCLE. */
-	public static final String PAR_CYCLE = "cyclelen";
+	private static final String PAR_CYCLE = "cyclelen";
 	
 	/** The Constant PAR_FIELD. */
-	public static final String PAR_FIELD = "fieldlen";
+	private static final String PAR_FIELD = "fieldlen";
 	
 	/** The Constant PAR_GEPHI. */
-	public static final String PAR_GEPHI = "gephisize";
+	private static final String PAR_GEPHI = "gephisize";
 	
 	/** The Constant PAR_MAXSPEED. */
-	public static final String PAR_MAXSPEED = "maxspeed";
+	private static final String PAR_MAXSPEED = "maxspeed";
 	
 	/** The Constant PAR_MINSPEED. */
-	public static final String PAR_MINSPEED = "minspeed";
+	private static final String PAR_MINSPEED = "minspeed";
 	
 	/** The Constant PAR_SHOW_GROUPS. */
-	public static final String PAR_SHOW_GROUPS = "showgroups";
+	private static final String PAR_SHOW_GROUPS = "showgroups";
 	
 	/** The coordinates pid. */
-	public int coordinatesPid;
+	private int coordinatesPid;
 	
 	/** The newapp id. */
-	public int newappId;
+	private int newappId;
 	
 	/** The transport id. */
-	public int transportId;
+	private int transportId;
 	
 	/** The linkable id. */
-	public int linkableId;
+	private int linkableId;
 	
 	/** The p2pmanager id. */
-	public int p2pmanagerId;
+	private int p2pmanagerId;
 	
 	/** The application id. */
-	public int applicationId;
+	private int applicationId;
 	
 	/** The p2p info pid. */
-	public int p2pInfoPid;
+	private int p2pInfoPid;
 	
 	/** The Cycle length. */
-	public int CycleLength;
+	private int CycleLength;
 	
 	/** The Field length. */
-	public int FieldLength;
+	private int FieldLength;
 	
 	/** The Gephi size. */
-	public int GephiSize;
+	private int GephiSize;
 	
 	/** The maxspeed. */
-	public double maxspeed;
+	private double maxspeed;
 	
 	/** The minspeed. */
-	public double minspeed;
+	private double minspeed;
 	
 	/** The showgroups. */
 	private boolean showgroups;

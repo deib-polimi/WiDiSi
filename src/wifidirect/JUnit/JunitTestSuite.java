@@ -25,6 +25,8 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import wifidirect.Simulator;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class JunitTestSuite.
@@ -47,7 +49,7 @@ public class JunitTestSuite {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		System.out.println("setting up");
-		SimulatorForTest.main(null);
+		Simulator.main(null);
 	}
 
 	/**

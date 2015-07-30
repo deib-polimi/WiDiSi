@@ -24,6 +24,7 @@ package wifidirect.p2pcore;
 // TODO: Auto-generated Javadoc
 /**
  * The Class callbackMessage.
+ * This message class could be used whenever a socket delivery is needed
  */
 public class callbackMessage {
 	   /**

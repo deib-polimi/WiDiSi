@@ -25,6 +25,7 @@ import java.util.EventListener;
 // TODO: Auto-generated Javadoc
 /**
  * The Interface BroadcastReceiver.
+ * Any class which is eager to receive Wi-Fi P2P actions should implement this Interface.
  */
 public interface BroadcastReceiver extends EventListener{
 

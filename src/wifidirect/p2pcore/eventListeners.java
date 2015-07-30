@@ -36,38 +36,41 @@ import wifidirect.p2pcore.WifiP2pManager.*;
 // TODO: Auto-generated Javadoc
 /**
  * The Class eventListeners.
+ * This class keeps the list of all listeners. This class is an intermediate class for callback messages. All listeners who are intersted to get notified
+ * whenever an event has been performed would register itself in this intermidiate class. Then All other classes who are resposnible 
+ * to detect events will send their results to this class and this class inform all listeners and boradcast receivers through a callback message.  
  */
 public class eventListeners implements EDProtocol {
 
 	/**  transport protocol for event-based simulation *. */
-	public static final String PAR_TRASP2 = "transport2";	
+	private static final String PAR_TRASP2 = "transport2";	
 
 	/** The transport id2. */
-	public int transportId2;
+	private int transportId2;
 
 	/**  Linkable protocol for event-based simulation *. */
-	public static final String PAR_LINK = "Linkable";
+	private static final String PAR_LINK = "Linkable";
 
 	/** The linkable id. */
-	public int linkableId;
+	private int linkableId;
 
 	/**  manager protocol for event-based simulation *. */
-	public static final String PAR_MANAGE = "p2pmanager";
+	private static final String PAR_MANAGE = "p2pmanager";
 
 	/** The p2pmanager id. */
-	public int p2pmanagerId;
+	private int p2pmanagerId;
 
 	/**  Node Info protocol for event-based simulation *. */
-	public static final String PAR_P2PINFO = "p2pinfo";
+	private static final String PAR_P2PINFO = "p2pinfo";
 
 	/** The p2p info pid. */
 	public int p2pInfoPid;
 
 	////////////////////////////////////////////////////////////////
-	/** The p listeners. */
+	/** the list of  Wi-Fi P2P PeerList listeners. Any listeners who are interested to receive callbacks of {@link WifiP2pDeviceList} whenever requested will be added to this list *. */
 	private Set<PeerListListener> pListeners;
 
-	/** The c listeners. */
+	/** The Wi-Fi P2P Connection-Info Listener-list. Any listeners who are interested to receive callbacks of {@link WifiP2pInfo} whenever requested will be added to this list *. */
 	private Set<ConnectionInfoListener> cListeners;
 
 	/** The g listeners. */
@@ -84,19 +87,19 @@ public class eventListeners implements EDProtocol {
 	////////////////////////////////////////////////////////////////
 
 	/** The Constant CONNECTED. */
-	public static final int CONNECTED   = 0;
+	private static final int CONNECTED   = 0;
 	
 	/** The Constant INVITED. */
-	public static final int INVITED     = 1;
+	private static final int INVITED     = 1;
 	
 	/** The Constant FAILED. */
-	public static final int FAILED      = 2;
+	private static final int FAILED      = 2;
 	
 	/** The Constant AVAILABLE. */
-	public static final int AVAILABLE   = 3;
+	private static final int AVAILABLE   = 3;
 	
 	/** The Constant UNAVAILABLE. */
-	public static final int UNAVAILABLE = 4;
+	private static final int UNAVAILABLE = 4;
 
 	/** The this node. */
 	private Node thisNode = Network.get(0); // initialize with an arbitrary node to prevent null return
@@ -248,12 +251,11 @@ public class eventListeners implements EDProtocol {
 		dnsListeners = new HashSet<DnsSdServiceResponseListener>();
 		txtListeners = new HashSet<DnsSdTxtRecordListener>();
 		broadcastReceivers = new HashSet<BroadcastReceiver>();
-		//evl.writer = writer;
 		return evl;	
 	}
 
 	/**
-	 * Adds the broadcast receiver.
+	 * Adds the broadcast receiver. This method will be called by the WifiP2pManager.registerboradcastreceiver
 	 *
 	 * @param receiver the receiver
 	 */
@@ -409,8 +411,8 @@ public class eventListeners implements EDProtocol {
 	}
 
 	/**
-	 * Notify txt info listeners.
-	 *
+	 * Notify TxtInfoListeners when a newly discovered service contains records. This method will call 
+	 * onDnsSdTxtRecordAvailable methods on all listeners and pass the serviceRecord to them.
 	 * @param action the action
 	 * @param p2pservice the p2pservice
 	 */

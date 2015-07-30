@@ -40,28 +40,28 @@ import wifidirect.p2pcore.nodeP2pInfo;
 public class NodeMovement implements Control{
 
 	/** Linkable protocol *. */
-	public static final String PAR_LINKABLE = "linkable";
+	private static final String PAR_LINKABLE = "linkable";
 	
 	/** The linkable id. */
-	public int linkableId;
+	private int linkableId;
 
 	/**  Coordinates protocol which keeps coordinates *. */
-	public static final String PAR_COORD = "coord";
+	private static final String PAR_COORD = "coord";
 	
 	/** The coordinates pid. */
 	public int coordinatesPid;
 
 	/**  eventDetection protocol for event-based simulation *. */
-	public static final String PAR_P2PINFO = "p2pinfo";
+	private static final String PAR_P2PINFO = "p2pinfo";
 	
 	/** The p2p info pid. */
-	public int p2pInfoPid;
+	private int p2pInfoPid;
 
 	/** The Constant PAR_MANAGE. */
-	public static final String PAR_MANAGE = "p2pmanager";
+	private static final String PAR_MANAGE = "p2pmanager";
 	
 	/** The p2pmanager id. */
-	public int p2pmanagerId;
+	private int p2pmanagerId;
 
 	/** The Constant RADIO_RANGE. */
 	private static final String RADIO_RANGE = "radio_range";

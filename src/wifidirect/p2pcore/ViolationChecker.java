@@ -55,16 +55,16 @@ public class ViolationChecker implements Control, PeerListListener, GroupInfoLis
 
 
 	/** The Constant PAR_P2PINFO. */
-	public static final String PAR_P2PINFO = "p2pinfo";
+	private static final String PAR_P2PINFO = "p2pinfo";
 	
 	/** The Constant PAR_LINKABLE. */
-	public static final String PAR_LINKABLE = "linkable";
+	private static final String PAR_LINKABLE = "linkable";
 	
 	/** The Constant PAR_LISTENER. */
-	public static final String PAR_LISTENER = "listeners";
+	private static final String PAR_LISTENER = "listeners";
 	
 	/** The Constant PAR_MANAGE. */
-	public static final String PAR_MANAGE = "p2pmanager";
+	private static final String PAR_MANAGE = "p2pmanager";
 
 	/** The rule2 node list. */
 	private List<Node> rule2NodeList = new ArrayList<Node>();
@@ -73,16 +73,16 @@ public class ViolationChecker implements Control, PeerListListener, GroupInfoLis
 	private List<Node> rule7NodeList = new ArrayList<Node>();
 
 	/** The listener pid. */
-	public int listenerPid;
+	private int listenerPid;
 	
 	/** The p2p info pid. */
-	public int p2pInfoPid;
+	private int p2pInfoPid;
 	
 	/** The linkable id. */
-	public int linkableId;
+	private int linkableId;
 	
 	/** The p2pmanager id. */
-	public int p2pmanagerId;
+	private int p2pmanagerId;
 
 	/** The cycle. */
 	private long cycle=0;

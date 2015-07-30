@@ -22,9 +22,8 @@ package wifidirect.p2pcore;
 
 import peersim.core.Node;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class WifiP2pInfo.
+ * The Class WifiP2pInfo. The same API as WiFi P2P API in Android.
  */
 public class WifiP2pInfo {
 
