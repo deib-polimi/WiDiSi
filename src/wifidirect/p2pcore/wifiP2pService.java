@@ -52,7 +52,7 @@ public class wifiP2pService {
 	public wifiP2pService (String name, String type, HashMap<String, String> record){
 		serviceName = name;
 		serviceType = type;
-		serviceRecord = new HashMap<String, String>(record);
+		serviceRecord = record;
 	}
 
 	/* (non-Javadoc)

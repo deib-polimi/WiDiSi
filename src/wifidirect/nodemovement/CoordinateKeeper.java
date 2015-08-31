@@ -73,8 +73,7 @@ public class CoordinateKeeper implements Protocol {
     	CoordinateKeeper inp = null;
         try {
             inp = (CoordinateKeeper) super.clone();
-        } catch (CloneNotSupportedException e) {
-        } // never happens
+        } catch (CloneNotSupportedException e) {} // never happens
         return inp;
     }
 

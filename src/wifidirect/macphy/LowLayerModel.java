@@ -109,4 +109,6 @@ public interface LowLayerModel {
 	 * @return the double
 	 */
 	public double dropRate(Node src, Node dest, Object object);
+	
+	public int getRSSIdbm(Node node, Node ap);
 }

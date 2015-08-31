@@ -36,6 +36,9 @@ import peersim.core.Node;
  * The Class WifiP2pGroup.
  */
 public class WifiP2pGroup {
+	
+	private String SSID;
+	private String BSSID;
 
 	// Fields related to group Info
 	/** The node list. */
@@ -224,5 +227,15 @@ public class WifiP2pGroup {
 	public void setmNetId(int mNetId) {
 		this.mNetId = mNetId;
 	}
+	
+/**
+ * SSID is the name of the network	
+ * BSSID is the MAC address of the Access Point which in our case is the node ID
+ * @return
+ */
+	public String getSSID(){
+		return mInterface;
+	}
+
 
 }

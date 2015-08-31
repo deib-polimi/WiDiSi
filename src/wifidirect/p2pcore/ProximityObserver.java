@@ -27,6 +27,7 @@ import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.Linkable;
 import peersim.core.Node;
+import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 import wifidirect.nodemovement.Visualizer;
 
@@ -36,7 +37,7 @@ import wifidirect.nodemovement.Visualizer;
  * An asynchronous update interface for receiving notifications
  * about Proximity information as the Proximity is constructed.
  */
-public class ProximityObserver implements CDProtocol{
+public class ProximityObserver implements EDProtocol, CDProtocol{
 
 	/** The Constant CONNECTED. */
 	public static final int CONNECTED   = 0;
@@ -274,6 +275,13 @@ public class ProximityObserver implements CDProtocol{
 			if(!pre.contains(aNode)) past = true;
 		}
 		return (post || past);	
+	}
+
+
+	@Override
+	public void processEvent(Node arg0, int arg1, Object arg2) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

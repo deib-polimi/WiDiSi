@@ -18,7 +18,7 @@
  * Politecnico di Milano
  *
  */
-package wifidirect.userApp;
+package applications.dummy;
 
 import peersim.config.Configuration;
 import peersim.core.Control;

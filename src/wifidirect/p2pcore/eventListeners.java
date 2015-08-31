@@ -228,6 +228,10 @@ public class eventListeners implements EDProtocol {
 				}
 			}
 			break;
+			
+		case "SCAN_RESULTS_AVAILABLE_ACTION":
+			notifyBroadcastReceivers("SCAN_RESULTS_AVAILABLE_ACTION");
+			break;
 
 		default:
 			break;		

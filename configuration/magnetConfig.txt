@@ -1,5 +1,5 @@
+######################################################################################################
 ########### Simulation parameters ######################
-########################################################
 random.seed 		1234567890
 network.size 		100
 
@@ -18,7 +18,7 @@ FieldLength 		1000.0
 
 ########### Max and Min speen in metter per second and radio range in meter
 SpeedMx 			5
-SpeedMn 			0
+SpeedMn 			1
 Radio 				200.0
 
 ########### initial Ghephi Node size (huristic calculation)
@@ -28,10 +28,10 @@ gephiSize 			(FieldLength/20)
 RANGE 				(Radio/FieldLength)
 
 #Network Dynamic
-MIN_NET_SIZE 		80
-MAX_NET_SIZE 		150
+MIN_NET_SIZE 		50
+MAX_NET_SIZE 		200
 NET_ADD_STEP 		1
-SIN_PERIOD 			10000
+SIN_PERIOD 			1000
 NET_ADD_CYCLE_START 1
 NET_ADD_CYCLE_END 	simulation.endtime
 MAX_SPEED 			(SpeedMx*10*CycleLenght)/FieldLength
@@ -48,8 +48,11 @@ Internal_Processing_Delay 	5
 ####### this number of cycles here should be equal to 15 seconds which are necessary for group formation
 COEF15 				(15000/CycleLenght)
 
+
+######################################################################################################
+#############    INITIALIZERS    #######################
+
 ########### wiring initializer #########################
-########################################################
 init.rnd wifidirect.nodemovement.WireInetTopology
 {
 	protocol 		lnk
@@ -59,32 +62,104 @@ init.rnd wifidirect.nodemovement.WireInetTopology
 }
 
 ########### cordination initializer ####################
-######################################################## 
 init.initcord CoordinateInitializer
 {
 	protocol 		intcord
 }
-
-########### Node info initializer
+ 
+########### Node info initializer  #####################
 init.initnode nodeInitializer
 {
 	protocol_1 		nodinf
 	protocol_3 		p2pmanager
-	protocol_4 		test1
 }
 
-########### P2P Node information protocol
-protocol.nodinf nodeP2pInfo
+########### CDScheduler on EDSimulator #################
+init.sch CDScheduler
+init.sch.protocol test1 proob wifimanager
+init.sch.randstart
+
+########### Ordering the initializer execution #########
+order.init 		initnode, initcord, rnd, sch
+
+######################################################################################################
+#############    CONTROLS    ###########################
+
+########### Network Visualizer #########################
+control.viz Visualizer
+{
+	transport 		utr1
+	p2pinfo 		nodinf
+	linkable 		lnk
+	p2pmanager 		p2pmanager
+	coord 			intcord
+	cyclelen		CycleLenght
+	fieldlen		FieldLength
+	gephisize		gephiSize
+	maxspeed		SpeedMx
+	minspeed		SpeedMn
+	showgroups		Visualize_Groups
+	step 			1
+}
+
+########### Violation Checker #########################
+control.vioch ViolationChecker
+{
+	p2pinfo			nodinf
+	linkable		lnk
+	listeners		lst
+	p2pmanager		p2pmanager
+	step 			1
+}
+
+########### Control Dynamism  ##########################
+control.dnet OscillatingNetwork
+{
+#	add 		NET_ADD_STEP
+	minsize 	MIN_NET_SIZE
+	maxsize 	MAX_NET_SIZE
+	period		SIN_PERIOD
+#	from 		NET_ADD_CYCLE_START
+#	until 		NET_ADD_CYCLE_end
+	step 		1
+	init.0 		CoordinateInitializer
+	{
+		protocol 		intcord
+	}
+
+	init.1 		nodeInitializer
+	{
+		protocol_1 		nodinf
+		protocol_3 		p2pmanager
+	}
+	
+	init.2		CDScheduler
+	{
+		protocol 		test1 proob wifimanager
+		
+	}	
+}
+
+########## Node Movement ################################
+control.move NodeMovement
 {
 	linkable 		lnk
-	transport5 		tr5
-	transport2 		utr2
-	transport1 		utr1
-	listeners 		lst
+	p2pinfo 		nodinf
+	p2pmanager 		p2pmanager
+	coord 			intcord
+	radio_range 	RANGE
+	node_speed_max 	MAX_SPEED
+	node_speed_min 	MIN_SPEED
+	step 			1
 }
 
+########### Ordering the controls execution ############
+order.control 	dnet, move, viz, vioch
+
+######################################################################################################
+#############    CDPROTOCOLS    ########################
+
 ########### Proximity Observer #########################
-########################################################
 protocol.proob ProximityObserver
 {
 	linkable 		lnk
@@ -98,41 +173,6 @@ protocol.proob ProximityObserver
 	step			1
 }
 
-########### Network Visualizer #########################
-########################################################
-control.viz Visualizer
-{
-	newapp 			test1
-	transport 		utr1
-	p2pinfo 		nodinf
-	linkable 		lnk
-	p2pmanager 		p2pmanager
-	application		test1
-	coord 			intcord
-	cyclelen		CycleLenght
-	fieldlen		FieldLength
-	gephisize		gephiSize
-	maxspeed		SpeedMx
-	minspeed		SpeedMn
-	showgroups		Visualize_Groups
-	step 			1
-}
-
-control.vioch ViolationChecker
-{
-	p2pinfo			nodinf
-	linkable		lnk
-	listeners		lst
-	p2pmanager		p2pmanager
-	step 			1
-}
-
-control.sDev sDeviation
-{
-	application		test1
-	step 			1
-}
-
 ###########  WiFi Manager Protocol  ####################
 protocol.wifimanager WifiManager
 {
@@ -144,23 +184,19 @@ protocol.wifimanager WifiManager
 	step			1
 }
 
-########### Ordering the controls execution ############
-order.init 		initnode, initcord, rnd, sch
-order.control 	dnet, move, viz, sDev, vioch
-
-########### Cordinates Keeper protocol ####################
-
-protocol.intcord CoordinateKeeper
-
-########### Linkable protocol ##########################
-########################################################
-protocol.lnk NeighborList
+########### test application  ##########################
+protocol.test1 WiFiServiceDiscoveryActivity
 {
-	capacity 		10
+	p2pmanager 		p2pmanager
+	p2pinfo 		nodinf
+	wifimanager		wifimanager
+	cyclelength		CycleLenght
+	step 			1
 }
+######################################################################################################
+#############    EDPROTOCOLS    ########################
 
 ########### Listeners List protocol ####################
-########################################################
 protocol.lst eventListeners
 {
 	transport2 		utr2
@@ -170,7 +206,6 @@ protocol.lst eventListeners
 }
 
 ########### WiFi P2P Manager protocol ##################
-########################################################
 protocol.p2pmanager WifiP2pManager
 {
 	linkable 		lnk
@@ -184,65 +219,27 @@ protocol.p2pmanager WifiP2pManager
 	p2pinfo 		nodinf
 }
 
-########### test application protocol for events #######
-########################################################
-protocol.test1 newApplication
-{
-	p2pmanager 		p2pmanager
-	wifimanager		wifimanager
-	p2pinfo 		nodinf
-	step 			1
-}
 
-########### CDScheduler on EDSimulator #################
-########################################################
-init.sch CDScheduler
-init.sch.protocol test1 proob wifimanager
-init.sch.randstart
+######################################################################################################
+#############    PROTOCOLS    ##########################
 
-########### Control Dynamism  ##########################
-########################################################
-#control.dnet DynamicNetwork
-control.dnet OscillatingNetwork
-{
-#	add 		NET_ADD_STEP
-	minsize 	MIN_NET_SIZE
-	maxsize 	MAX_NET_SIZE
-	period		SIN_PERIOD
-#	from 		NET_ADD_CYCLE_START
-#	until 		NET_ADD_CYCLE_end
-	step 		1
-################ Node initializer after adding #########
-	init.0 		CoordinateInitializer
-	{
-		protocol 		intcord
-	}
-	
-	init.1 		nodeInitializer
-	{
-		protocol_1 		nodinf
-		protocol_3 		p2pmanager
-		protocol_4 		test1
-	}
-	
-	init.2		CDScheduler
-	{
-		protocol 		test1 proob wifimanager
-		
-	}
-	
-}
-########## Node Movement ##################################
-control.move NodeMovement
+########### P2P Node information protocol  #############
+protocol.nodinf nodeP2pInfo
 {
 	linkable 		lnk
-	p2pinfo 		nodinf
-	p2pmanager 		p2pmanager
-	coord 			intcord
-	radio_range 	RANGE
-	node_speed_max 	MAX_SPEED
-	node_speed_min 	MIN_SPEED
-	step 			1
+	transport5 		tr5
+	transport2 		utr2
+	transport1 		utr1
+	listeners 		lst
+}
+
+########### Cordinates Keeper protocol ####################
+protocol.intcord CoordinateKeeper
+
+########### Linkable protocol #############################
+protocol.lnk NeighborList
+{
+	capacity 		10
 }
 
 ########### transport protocol #########################

@@ -120,21 +120,12 @@ public class Visualizer implements Control{
 	
 	/** The Constant UNAVAILABLE. */
 	public static final int UNAVAILABLE = 4;
-
-	/** The Constant PAR_COORD. */
-	private static final String PAR_COORD = "coord";
-	
-	/** The Constant PAR_PROTOCOL. */
-	private static final String PAR_PROTOCOL = "newapp";
 	
 	/** The Constant PAR_MANAGE. */
 	private static final String PAR_MANAGE = "p2pmanager";
 	
 	/** The Constant PAR_LINKABLE. */
 	private static final String PAR_LINKABLE = "linkable";
-	
-	/** The Constant PAR_APPLICATION. */
-	private static final String PAR_APPLICATION = "application";
 	
 	/** The Constant PAR_P2PINFO. */
 	private static final String PAR_P2PINFO = "p2pinfo";
@@ -163,9 +154,6 @@ public class Visualizer implements Control{
 	/** The coordinates pid. */
 	private int coordinatesPid;
 	
-	/** The newapp id. */
-	private int newappId;
-	
 	/** The transport id. */
 	private int transportId;
 	
@@ -174,9 +162,6 @@ public class Visualizer implements Control{
 	
 	/** The p2pmanager id. */
 	private int p2pmanagerId;
-	
-	/** The application id. */
-	private int applicationId;
 	
 	/** The p2p info pid. */
 	private int p2pInfoPid;
@@ -246,18 +231,18 @@ public class Visualizer implements Control{
 	public static JTextField rulesText1, rulesText2, rulesText3, rulesText4, rulesText5, rulesText6, rulesText7, rulesText8,
 	rulesText9, rulesText10, rulesText11, rulesText12, rulesText13, rulesText14, rulesText15;
 	
+	private static boolean scrollOutput = true;
+	
 	/**
 	 * Instantiates a new visualizer.
 	 *
 	 * @param prefix the prefix
 	 */
 	public Visualizer(String prefix){
-		newappId 		= Configuration.getPid(prefix + "." + PAR_PROTOCOL);
 		transportId 	= Configuration.getPid(prefix + "." + PAR_TRASP);
 		p2pInfoPid 		= Configuration.getPid(prefix + "." + PAR_P2PINFO);
 		linkableId 		= Configuration.getPid(prefix + "." + PAR_LINKABLE);
 		p2pmanagerId 	= Configuration.getPid(prefix + "." + PAR_MANAGE);
-		applicationId 	= Configuration.getPid(prefix + "." + PAR_APPLICATION);
 		CycleLength		= Configuration.getInt(prefix + "." + PAR_CYCLE);
 		FieldLength		= Configuration.getInt(prefix + "." + PAR_FIELD);
 		GephiSize		= Configuration.getInt(prefix + "." + PAR_GEPHI);
@@ -428,6 +413,8 @@ public class Visualizer implements Control{
 				file.add(showNet);
 				JMenuItem hideNet = new JMenuItem("Hide Network");
 				file.add(hideNet);
+				JMenuItem scrollOutput = new JMenuItem("Scroll Output List");
+				file.add(scrollOutput);
 
 				frame.setJMenuBar(mb);
 
@@ -448,6 +435,16 @@ public class Visualizer implements Control{
 				exit.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent actionEvent) {
 						frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+					}
+				});
+				
+				scrollOutput.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent actionEvent) {
+						if(Visualizer.scrollOutput){
+							Visualizer.scrollOutput = false;
+						}else{
+							Visualizer.scrollOutput = true;
+						}
 					}
 				});
 
@@ -1018,7 +1015,9 @@ public class Visualizer implements Control{
 	public static void print(Object ob) {
 		if(output!=null){
 			output.append("\n" + ob);
-			output.setCaretPosition(output.getDocument().getLength());
+			if (scrollOutput){
+				output.setCaretPosition(output.getDocument().getLength());
+			}
 		}
 	}
 

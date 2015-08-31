@@ -18,7 +18,7 @@
  * Politecnico di Milano
  *
  */
-package wifidirect.userApp;
+package applications.dummy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,18 +30,21 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
+import wifi.ScanResult;
+import wifi.WifiManager;
+import wifidirect.nodemovement.Visualizer;
 import wifidirect.p2pcore.BroadcastReceiver;
+import wifidirect.p2pcore.WifiP2pConfig;
 import wifidirect.p2pcore.WifiP2pDevice;
 import wifidirect.p2pcore.WifiP2pDeviceList;
 import wifidirect.p2pcore.WifiP2pGroup;
 import wifidirect.p2pcore.WifiP2pInfo;
-import wifidirect.p2pcore.WifiP2pManager.Callback;
+import wifidirect.p2pcore.WifiP2pManager;
 import wifidirect.p2pcore.callbackMessage;
 import wifidirect.p2pcore.nodeP2pInfo;
 import wifidirect.p2pcore.wifiP2pEvent;
-import wifidirect.p2pcore.WifiP2pManager;
-import wifidirect.p2pcore.WifiP2pManager.*;
 import wifidirect.p2pcore.wifiP2pService;
+import wifidirect.p2pcore.WifiP2pManager.*;
 // TODO: Auto-generated Javadoc
 /**
  * The Class newApplication.
@@ -82,6 +85,7 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 
 	/**  eventDetection protocol identifier for event-based simulation *. */
 	public int p2pInfoPid;
+	public int wifimanagerPid;
 
 	/** The cycle. */
 	private long cycle = 0;
@@ -109,7 +113,7 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 	 *
 	 * @param prefix the prefix
 	 */
-	//private Node thisNode=null;
+	private WifiManager wifiManager;
 
 	/**
 	 * Instantiates a new new application.
@@ -119,6 +123,7 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 	public newApplication (String prefix){
 		p2pmanagerId = Configuration.getPid(prefix + "." + PAR_MANAGE);
 		p2pInfoPid = Configuration.getPid(prefix + "." + PAR_P2PINFO);
+		wifimanagerPid = Configuration.getPid(prefix + "." + "wifimanager");
 	}
 
 	// Since it is a Event-Driven engine this method will be called once at the beggining. 
@@ -128,8 +133,8 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 	 */
 	@Override
 	public void nextCycle(Node node, int protocolID) {
-		//thisNode = node;
 		manager = (WifiP2pManager) node.getProtocol(p2pmanagerId);
+		wifiManager = (WifiManager) node.getProtocol(wifimanagerPid);
 		nodeInfo = (nodeP2pInfo) node.getProtocol(p2pInfoPid);
 
 		if(cycle==1){	
@@ -141,6 +146,8 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 			manager.registerDnsSdTxtRecordListener(this);
 			manager.registerHandler(this);
 			value = CommonState.r.nextDouble();
+			
+			wifiManager.startScan();
 			//Visualizer.print(String.valueOf(value));
 		}
 		if (cycle==2){	
@@ -160,7 +167,9 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 		// Standard Group Formation
 				if(cycle%30 ==0 && cycle >20){
 					if(!peerList.isEmpty()){
-						manager.connect(peerList.get(CommonState.r.nextInt(peerList.size())).deviceAddress);
+						WifiP2pConfig config = new WifiP2pConfig();
+						config.deviceAddress = peerList.get(CommonState.r.nextInt(peerList.size())).deviceAddress;
+						manager.connect(config);
 					}
 				}
 
@@ -211,6 +220,7 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 		catch( CloneNotSupportedException e ) {} // never happen
 		nw.p2pmanagerId = p2pmanagerId;
 		nw.p2pInfoPid = p2pInfoPid;
+		nw.wifimanagerPid = wifimanagerPid;
 		return nw;	
 	}
 
@@ -286,8 +296,13 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 			}
 			break;
 		case "WIFI_P2P_THIS_DEVICE_CHANGED_ACTION":
-
 			break;
+			
+		case "SCAN_RESULTS_AVAILABLE_ACTION":
+			
+			List<ScanResult> ScanResultList = new ArrayList<ScanResult>();
+			ScanResultList.addAll(wifiManager.getScanResults());
+			//Visualizer.print(ScanResultList);
 		}
 
 	}

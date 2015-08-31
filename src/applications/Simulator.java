@@ -16,7 +16,7 @@
  *
  */
 
-package wifidirect;
+package applications;
 
 import java.io.*;
 

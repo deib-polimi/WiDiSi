@@ -95,6 +95,11 @@ public class LLModel implements LowLayerModel, Protocol{
 		return rate;
 	}
 	
+	@Override
+	public int getRSSIdbm(Node node, Node ap){
+		double loss = 32.44 + 20*Math.log10(frequency) + 20*Math.log10(distance(node, ap, coordinatesPid)) - Gtx - Grx;
+		return (int) loss*(-1);
+	}
 	/**
 	 * Distance.
 	 *

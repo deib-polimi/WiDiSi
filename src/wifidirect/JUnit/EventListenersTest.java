@@ -30,8 +30,8 @@ import org.junit.Test;
 
 import peersim.core.Network;
 import peersim.core.Node;
-import wifidirect.p2pcore.WifiP2pManager.*;
 import wifidirect.p2pcore.*;
+import wifidirect.p2pcore.WifiP2pManager.*;
 
 // TODO: Auto-generated Javadoc
 /**

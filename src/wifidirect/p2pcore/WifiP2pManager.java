@@ -102,6 +102,29 @@ public class WifiP2pManager implements EDProtocol{
 	
 	/** The p2p info pid. */
 	private int p2pInfoPid;
+	
+    /**
+     * The lookup key for an int that indicates whether Wi-Fi p2p is enabled or disabled.
+     * Retrieve it with {@link android.content.Intent#getIntExtra(String,int)}.
+     *
+     * @see #WIFI_P2P_STATE_DISABLED
+     * @see #WIFI_P2P_STATE_ENABLED
+     */
+    public static final String EXTRA_WIFI_STATE = "wifi_p2p_state";
+    /**
+     * Wi-Fi p2p is disabled.
+     *
+     * @see #WIFI_P2P_STATE_CHANGED_ACTION
+     * @see #getWifiP2pState()
+     */
+    public static final int WIFI_P2P_STATE_DISABLED = 1;
+    /**
+     * Wi-Fi p2p is enabled.
+     *
+     * @see #WIFI_P2P_STATE_CHANGED_ACTION
+     * @see #getWifiP2pState()
+     */
+    public static final int WIFI_P2P_STATE_ENABLED = 2;
 
 	/** The this node. */
 	public Node thisNode = Network.get(CommonState.r.nextInt(Network.size()));  // initiate with some node just to avoid "if (thisNode!=null)"
@@ -565,16 +588,17 @@ public class WifiP2pManager implements EDProtocol{
 
 	/**
 	 * Connect.
-	 * After peers have been discovered, the device can connect to another device by passing the MacAddress of the other device to this method.
+	 * After peers have been discovered, the device can connect to another device by passing the {@link WifiP2pConfig} to this method.
 	 * The Mac address of the other device are the {@link Node} ID in WiDiSi
 	 *
 	 * @param MacAddress the mac address
 	 */
-	public void connect(String MacAddress) {
+	public void connect(WifiP2pConfig config) {
 		//nodeP2pInfo nodeInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
 		//nodeP2pInfo destInfo = (nodeP2pInfo) dest.getProtocol(p2pInfoPid);
 		// May connect only if the destination Node is insidethe proximity of thisNode
 		Node dest = null;
+		String MacAddress = config.deviceAddress;
 		for(int i=0; i<Network.size(); i++){
 			if(Network.get(i).getID()==Long.parseLong(MacAddress)){
 				dest = Network.get(i);
@@ -819,5 +843,20 @@ public class WifiP2pManager implements EDProtocol{
 		}else{
 			return "Receiver is not recognized";
 		}
+	}
+	
+	public int getExtraSystemInfo(String extra){
+		nodeP2pInfo nodeInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
+		int returnState = 60000;
+		switch (extra){
+		case EXTRA_WIFI_STATE:
+			if(nodeInfo.isWifiP2pEnabled()){
+				returnState =  WIFI_P2P_STATE_ENABLED;
+			}else{
+				returnState =  WIFI_P2P_STATE_DISABLED;
+			}
+			break;
+		}
+		return returnState;
 	}
 }
