@@ -13,9 +13,11 @@ import java.util.regex.Pattern;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
+import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 
 import wifi.ScanResult;
+import wifi.WifiConfiguration;
 import wifi.WifiManager;
 import wifidirect.nodemovement.Visualizer;
 import wifidirect.p2pcore.BroadcastReceiver;
@@ -52,7 +54,6 @@ ConnectionInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Pe
 BroadcastReceiver{
 
 	public static final String 	SERVICE_REG_TYPE 		= "_presence._tcp"; // this is registeration type for services
-	public static final String 	TAG 					= "wifidirectdemo"; // A common tag for LogCat
 
 	public static final int 	MESSAGE_READ 			= 0x400 + 1;		// Reserved Code for Message Handler 
 	public static final int 	MY_HANDLE 				= 0x400 + 2;		// Reserved Code for Message Handler
@@ -60,10 +61,15 @@ BroadcastReceiver{
 	public static final int     ALCON_APLIST_RESPONSE 	= 0x400 + 4;		// Reserved Code for Message Handler 
 	public static final int     ALCON_APLIST_REQUEST	= 0x400 + 5;		// Reserved Code for Message Handler 
 	public static final int		MESSAGE_TEST			= 0x400 + 6;		// Reserved Code for Message Handler 
+	public static final int		REQUEST_AP_SEEN			= 0x400 + 7;        // Reserved Code for Message Handler 
+	public static final int		CLIENT_AP_LIST			= 0x400 + 8;		// Reserved Code for Message Handler 
+	public static final int		REQUEST_CONNECT_AP		= 0x400 + 9;		// Reserved Code for Message Handler
 
+	private static final int	wTimeForWTA				= 10;				// period (seconds) in which the GO decide a new combination based on new clients added or removed
+	private boolean				startWTAClaculation		= false;
 	public static final int 	waitcoeff 				= 300;				// Waiting time will be multiply by this coefficient (milliseconds)
 	public static final int 	SERVER_PORT 			= 4545;				// Server port is the same in GroupOwnerSocketHandler
-	private peersim.core.Node   thisNode;
+	private Node   thisNode;
 
 	// None constant variables
 	public 	int 		count 				= 0;
@@ -80,7 +86,8 @@ BroadcastReceiver{
 	private	int			groupID				= 0;
 	private boolean		groupRecordUpdated	= false;
 	private boolean		alreadyConnected	= false;
-	private String		p2pMacAddress		= null;
+	private String		p2pMacAddress		= "";
+	public  String		goMacAddress		= "";		
 
 	//Device Status
 	public static final int CONNECTED   = 0;
@@ -92,7 +99,6 @@ BroadcastReceiver{
 	// Objetc definitions
 	private 		WifiP2pManager 				manager;
 	private			WifiManager 				wifiManager;
-	//private 		ChatManager 				chatManager;
 	private 	 	WifiP2pConfig 				config; 			  		// configuration of wifi p2p. here for WPS configuration
 	private			Group						newGroup;					// The current group if this device is GO. Otherwise it will return null
 	private 		wifiP2pService			 	serviceGroup;
@@ -101,21 +107,18 @@ BroadcastReceiver{
 	private 		boolean						delayHandler1Started = false, delayHandler2Started = false, delayHandler3Started = false, delayHandler4Started = false;
 	private 		long						cycleLength = 0;
 
-	// Collections
-	//private ArrayList<wifiP2pService>			servicesList;										
+	// Collections									
 	private HashMap<Double, String> 			intentionList;  			// Intention	<=>	Device Mac Address
 	private HashMap<String, String> 			serviceList;  				// Device Mac Address <=> Service Name
 	private HashMap<String, String> 			groupList;  				// Group ID   <=> Mac Address of GO
 	private ArrayList<WifiP2pDevice> 			peerList; 					// WifiP2pDevice of peers found in the proximity
 	private ArrayList<WifiP2pDevice> 			groupedPeerList; 			// WifiP2pDevice of peers in the group  
-	//private ArrayList<GroupOwnerSocketHandler> 	serverThreads; 				// each client need a seprate thread and socket
-	//private ArrayList<ChatManager> 				chatClientList;   			// List of ChatManagers. A chatManager Object is needed for each client to send message
-	private ArrayList<peersim.core.Node> 		chatClientList;
+	private ArrayList<Node> 					chatClientList;
 	private ArrayList<String>					macAddressList;
 	private List<WTAClass> 						WTAList;
 
-	private long cycle = 0;
-	private int p2pInfoPid, wifip2pmanagerPid, wifimanagerPid;
+	private long 								cycle = 0, emptyGroupTimerReached = 0;
+	private int 								p2pInfoPid, wifip2pmanagerPid, wifimanagerPid;							
 
 	public WiFiServiceDiscoveryActivity clone(){
 		WiFiServiceDiscoveryActivity wsda = null;
@@ -157,6 +160,7 @@ BroadcastReceiver{
 		isConnected = connectionState;    	
 		if(isConnected){ // if true
 			//Toast.makeText(WiFiServiceDiscoveryActivity.this, "Connected", Toast.LENGTH_SHORT).show();
+			//manager.requestConnectionInfo();
 			appendStatus("Connected!");
 			alreadyConnected = true;
 		}else{          // if false
@@ -165,6 +169,8 @@ BroadcastReceiver{
 			isGroupOwner = false;
 			isGroupFormed = false;
 			groupRecordUpdated = false;
+			startWTAClaculation = false;
+			WTAList.clear();
 			chatClientList.clear();
 			//Restart Discovery only if the disconnection was not requested by the user and we had already connected
 			if (alreadyConnected && !appTerminate){
@@ -200,9 +206,10 @@ BroadcastReceiver{
 
 
 	@Override
-	public void nextCycle(peersim.core.Node node, int pid) {
+	public void nextCycle(Node node, int pid) {
 		thisNode = node;
 		if (cycle == 1){
+
 
 			// Initiallizing wifiP2P manager, Channel and Broadcast receiver and registering the receiver
 			manager = (WifiP2pManager) node.getProtocol(wifip2pmanagerPid);
@@ -219,7 +226,7 @@ BroadcastReceiver{
 			groupedPeerList 	= new ArrayList<WifiP2pDevice>(); 	// WifiP2pDevice of peers in the group  
 			//serverThreads		= new ArrayList<GroupOwnerSocketHandler>(); // each client need a seprate thread and socket
 			//chatClientList		= new ArrayList<ChatManager>();  	 // List of ChatManagers. A chatManager Object is needed for each client to send message
-			chatClientList		= new ArrayList<peersim.core.Node>(); 
+			chatClientList		= new ArrayList<Node>(); 
 			macAddressList  	= new ArrayList<String>();
 			WTAList 			= new ArrayList<WTAClass>();
 
@@ -306,6 +313,30 @@ BroadcastReceiver{
 			connectP2p(newService);
 			delayHandler4Started = false;
 		}
+
+		// if WTA calculation requested: decide the group connection every 10 seconds
+		if(isGroupOwner && startWTAClaculation && cycle%((wTimeForWTA*1000)/cycleLength)==0){
+			startWTAClaculation = false;
+			decideGroupConnection(WTAList);
+		}
+
+		// empty group time out check -- If a GO remains without any clients for 10 seconds then it should check around to see if it is possible to connec to another group as a client or not
+		// If it is possible the GO will remove its group and will connect to the other group as client
+		if(isGroupOwner && groupedPeerList.isEmpty() && emptyGroupTimerReached<=(10000/cycleLength)){
+			emptyGroupTimerReached++;
+		}else if(isGroupOwner && groupedPeerList.isEmpty() && emptyGroupTimerReached>(10000/cycleLength)){
+			emptyGroupTimerReached = 0;
+
+			if(!groupList.isEmpty()){
+				manager.removeGroup();
+				// getting the first group in the list
+				config.deviceAddress = groupList.get((String) groupList.keySet().toArray()[0]);
+				manager.connect(config);
+			}
+		}else{
+			emptyGroupTimerReached = 0;
+		}
+
 		cycle++;
 	}
 
@@ -317,7 +348,7 @@ BroadcastReceiver{
 
 		manager.addLocalService(service1);
 		// Start Service discovery
-		
+
 		discoverService();
 	}
 
@@ -492,6 +523,16 @@ BroadcastReceiver{
 		}
 		intentionList.put(intention, p2pMacAddress);  // adding the Intention of this device again because it was remove at the above procedure
 
+		//remove the previous groups from groupList if there are not available anymore		
+		for (Iterator<Entry<String, String>> itr = groupList.entrySet().iterator(); itr.hasNext();)
+		{
+			Map.Entry<String, String> entrySet = (Entry<String, String>) itr.next();
+			String value = entrySet.getValue();
+			if (!macAddressList.contains((value)))
+			{
+				itr.remove();               
+			}
+		}
 		// if we are the group owner we send the invitation to the newly found peer
 		if (isConnected && isGroupOwner){					
 			for (WifiP2pDevice device : peerList){
@@ -529,6 +570,7 @@ BroadcastReceiver{
 
 		if (p2pInfo.isGroupOwner) {
 			isGroupOwner = true;
+			goMacAddress = p2pMacAddress;
 			appendStatus("Connected as group owner");
 			appendStatus("Group formed= " + isGroupFormed);
 			manager.requestGroupInfo();   // will be infomed at the onGroupInfoAvailable callback whenever it was ready    	
@@ -536,37 +578,21 @@ BroadcastReceiver{
 		} else if (isGroupFormed){
 			appendStatus("Group formed= " + p2pInfo.groupFormed);        	
 			isGroupOwner = false;
+			goMacAddress = p2pInfo.groupOwnerAddress;
+			callbackMessage newMessage = new callbackMessage();
+			newMessage.what = MY_HANDLE;
+			newMessage.obj = p2pMacAddress;
+			String Receiver = p2pInfo.groupOwnerAddress;
+			manager.send(newMessage, Receiver); 
+
 		}
 	}
 
 	// Status of the program which will be shown at the bottom
 	public void appendStatus(String status) {
-		Visualizer.print(status);
+		//Visualizer.print(status);
 	}
 
-//	public void setChatManager(ChatManager obj) {
-//		chatManager = obj;
-//		chatClientList.add(chatManager);
-//		if(isGroupOwner){
-//			appendStatus(chatClientList.size() + "th peer address: " +  chatManager.getRemoteAddress());  
-//			requestClientApList(chatManager);
-//		}
-//		else{
-//			appendStatus("Connected as peer to: " + chatManager.getRemoteAddress());
-//		}
-//	}
-
-//	public void requestClientApList(ChatManager chatManager){
-//		//		magnetMessage message = new magnetMessage();
-//		//		message.what = ALCON_APLIST_REQUEST;
-//		//		Bundle bundle = new Bundle();
-//		//		bundle.putString(chatManager.getLocalAddress(), chatManager.getRemoteAddress());
-//		//		message.setData(bundle);
-//		//		ArrayList<String> Testlist = new ArrayList<String>();
-//		//		Testlist.add("SALAM");
-//		//		chatManager.writeObject(Testlist);
-//		//		appendStatus("AP request sent!");
-//	}
 	// Clearing the service requests and start a fresh discovery
 	// discovery stops after connection but we need to continue discovery
 	public void restartServiceDiscovery(){
@@ -583,9 +609,17 @@ BroadcastReceiver{
 
 	//Updating list of wifi APs
 	public void updateWifiAPs(){
-
+		//Visualizer.print("Update WIFI AP");
 		List<ScanResult> wifiScanResults = new ArrayList<ScanResult>();
 		wifiScanResults = wifiManager.getScanResults();
+
+		//		WifiManager wifiManager = (WifiManager) thisNode.getProtocol(wifimanagerPid);
+		//		if(wifiManager.getWifiStatus()==AVAILABLE && wifiScanResults.size()>0){
+		//			WifiConfiguration config = new WifiConfiguration();
+		//			config.SSID = wifiScanResults.get(CommonState.r.nextInt(wifiScanResults.size())).SSID;
+		//			Visualizer.print("Trying to connect to SSID: " + config.SSID);
+		//			wifiManager.connect(config);
+		//		}
 
 		//		wifiAPList.clear();
 		//		directAPList.clear();
@@ -671,22 +705,56 @@ BroadcastReceiver{
 
 	// Here Group Owner decieds intelligently and tell each client to connect to what other APs(GOs)
 	private void decideGroupConnection(List<WTAClass> interfaceList){
+
+		//remove the current group owner (this Node) from the scanresultlists
+		for(WTAClass tempWTA: interfaceList){
+			for (Iterator<ScanResult> apIterator = tempWTA.getGroupSeen().iterator(); apIterator.hasNext();) {
+				ScanResult result = apIterator.next();
+				if (result.BSSID.equals(p2pMacAddress)) {
+					// Remove the current element from the iterator and the list.
+					//Visualizer.print("GO Removed: " + goMacAddress);
+					apIterator.remove();
+				}
+			}
+		}
+
+		// include only thoes interfaces in the calculation which see some external access points
+		List <WTAClass> newInterfaceList = new ArrayList<WTAClass>();
+		for(WTAClass tempWTA: interfaceList){
+			if(tempWTA.getGroupSeen().size()>0){
+				newInterfaceList.add(tempWTA);
+			}
+		}
+
+		// if after the previous function the interface list remains without element: return
+		if(newInterfaceList.size()==0) return;
+
+		//		Visualizer.print("GO ID: " + p2pMacAddress + " received this interface list: ");
+		//		for(WTAClass tempWTA: interfaceList){
+		//			Visualizer.print("Interface ID: " + tempWTA.getInterfaceName() + " See the following APs: ");
+		//			for(ScanResult tempresult: tempWTA.getGroupSeen()){
+		//				Visualizer.print("AP name: " + tempresult.SSID);
+		//			}
+		//		}
+		//		Visualizer.print("###################################");
+
 		appendStatus("decideGroupConnection");
-		Node root = new Node("root");
+		wtaNode root = new wtaNode("root");
 
 		// Now instantiate a Tree with the above test information
 		Tree tree = new Tree("Tree0", root);
-		tree.generateTree(interfaceList);
+		tree.generateTree(newInterfaceList);
 
 		// Extracting the List of all external proximity groups from interfaceList
 		List<String> groupsInInterfaceList = new ArrayList<String>(); 
-		for(WTAClass tempWTA: interfaceList){
+		for(WTAClass tempWTA: newInterfaceList){
 			for(ScanResult tempString: tempWTA.getGroupSeen()){
 				if (!groupsInInterfaceList.contains(tempString.BSSID)){
 					groupsInInterfaceList.add(tempString.BSSID);
 				}
 			}
 		}
+
 		// Find possible solutions by passing the tree to the findNodeDFS method
 		List<HashMap<String, String>> finalResult = new ArrayList<HashMap<String, String>>();
 		finalResult = findNodeDFS(root);
@@ -705,28 +773,51 @@ BroadcastReceiver{
 						stage = Integer.parseInt((matcher.group(1).substring(0,1)));
 					}
 
-					String newString = interfaceList.get(stage-1).getInterfaceName();
+					String newString = newInterfaceList.get(stage-1).getInterfaceName();
 					newHash.put(tempString, newString); 
 				}
 			}
 			finalResultB.add(newHash);				
 		}
 
-		// Print the reruned solutions (finalResult => normal; finalResultB => human redeable format)
-		System.out.println(finalResult.size() + " different combination(s) are possible to connect to maximum " + 
-				finalResult.get(0).size() + " groups (out of " + groupsInInterfaceList.size() + ")" + 
-				" by means of " + interfaceList.size() + " interfaces");
-		for (HashMap<String, String> hash: finalResultB){
-			System.out.println(hash);
-		}
 
-		// Pass all possible solutions to the solutionOptimizer method to find the optimized one based on user defined metrics
-		HashMap<String, String> optimizedSolution = new HashMap<String, String>();
-		optimizedSolution = solutionOptimizer(finalResultB, interfaceList);
-		//Log.d("optimizedSolution", "\nThe optimized solution is:\n " + optimizedSolution);	
+		//		Visualizer.print("The size of solutions: " + finalResultB.size());
+		//		for(HashMap<String, String> tempHash: finalResultB){
+		//			 Iterator it = tempHash.entrySet().iterator();
+		//		    while (it.hasNext()) {
+		//		        Map.Entry pair = (Map.Entry)it.next();
+		//		        Visualizer.print(pair.getKey() + " = " + pair.getValue());
+		//		        Visualizer.print("===================================");
+		//		    }
+		//			
+		//			Visualizer.print("===================================");
+		//		}
+		//		Visualizer.print("#################################");
+
+		// Print the reruned solutions (finalResult => normal; finalResultB => human redeable format)
+		//		System.out.println(finalResult.size() + " different combination(s) are possible to connect to maximum " + 
+		//				finalResult.get(0).size() + " groups (out of " + groupsInInterfaceList.size() + ")" + 
+		//				" by means of " + interfaceList.size() + " interfaces");
+		//		for (HashMap<String, String> hash: finalResultB){
+		//			System.out.println(hash);
+		//		}
+
+		// Pass all possible solutions to the solutionOptimizer method to find the optimized one based on user defined metrics		
+		HashMap<String, String> bestSolution = new HashMap<String, String>();
+		//bestSolution = finalResultB.get(0);
+		bestSolution = solutionOptimizer(finalResultB, newInterfaceList);
+		connectGroups(bestSolution);
+
+		//System.out.println("Optimized Solutions: " + optimizedSolution);
+		//		 Iterator it = optimizedSolution.entrySet().iterator();
+		//		    while (it.hasNext()) {
+		//		        Map.Entry pair = (Map.Entry)it.next();
+		//		        Visualizer.print(pair.getKey() + " = " + pair.getValue());
+		//		    }
+		//Log.d("optimizedSolution", "\nThe optimized solution is:\n " + optimizedSolution);
 	}
 
-	public static List<HashMap<String, String>> findNodeDFS(final Node root) {
+	public static List<HashMap<String, String>> findNodeDFS(final wtaNode root) {
 		int i=0;
 		int stage = 0;
 		int maxSize=0;
@@ -734,13 +825,12 @@ BroadcastReceiver{
 
 		List<HashMap<String, String>> finalSolution = new ArrayList<HashMap<String, String>>();
 
-
 		@SuppressWarnings("serial")
-		Stack<Node> stack = new Stack<Node>(){{
+		Stack<wtaNode> stack = new Stack<wtaNode>(){{
 			add(root);  
 		}};
 		while (!stack.isEmpty()) {
-			Node current = stack.pop();
+			wtaNode current = stack.pop();
 			String mydata = current.nodeName;
 
 			// Extracting the Stage that the current node is in
@@ -789,26 +879,28 @@ BroadcastReceiver{
 		for (HashMap<String, String> tempHash: finalResultB){
 			Iterator<Entry<String, String>> it = tempHash.entrySet().iterator();
 			double newdouble = 0;
-//			while (it.hasNext()) {
-//				@SuppressWarnings("rawtypes")
-//				HashMap.Entry pairs = (HashMap.Entry)it.next();
-//				double RSSI= 0;
-//				double groupValue = 1;
-//
-//				// getting the RSSI and group Value for current pairs (connection)
-//				for (WTAClass tempWTA: interfaceList){
-//					if(tempWTA.getInterfaceName().equals(pairs.getValue())){
-//						RSSI = (double)tempWTA.RSSIMap.get(pairs.getKey());
-//						groupValue = (double)tempWTA.groupValue.get(pairs.getKey());
-//
-//					}
-//				}
-//				// calculating one of the line of the algorithm (Weapon Target Assignment)
-//				newdouble = newdouble + groupValue*(1-(RSSI/100));
-//
-//				//pairs.getKey()  pairs.getValue();
-//				//it.remove(); // avoids a ConcurrentModificationException
-//			}
+			while (it.hasNext()) {
+				Map.Entry<String, String> pairs = (Map.Entry<String, String>)it.next();
+				double RSSI= 0;
+				double groupValue = 1;
+
+				// getting the RSSI and group Value for current pairs (connection)
+				for (WTAClass tempWTA: interfaceList){
+
+					if(tempWTA.getInterfaceName().equals(pairs.getValue())){
+						Visualizer.print(" PaisValue: " + pairs.getValue() + " key: " + pairs.getKey());
+						if(tempWTA.RSSIMap.get(pairs.getKey())!=null)
+							RSSI = (double)tempWTA.RSSIMap.get(pairs.getKey());
+						if(tempWTA.groupValue.get(pairs.getKey())!=null)
+							groupValue = (double)tempWTA.groupValue.get(pairs.getKey());
+					}
+				}
+				// calculating one of the line of the algorithm (Weapon Target Assignment)
+				newdouble = newdouble + groupValue*(1-(RSSI/100));
+
+				//pairs.getKey()  pairs.getValue();
+				//it.remove(); // avoids a ConcurrentModificationException
+			}
 
 
 
@@ -820,6 +912,21 @@ BroadcastReceiver{
 			}
 		}
 		return optimizedSolution;
+	}
+
+	// ask clients to connect to the external groups via WiFi Interface
+	public void connectGroups(HashMap<String, String> bestSolution){
+		if(isGroupOwner){
+			Iterator<Entry<String, String>> it = bestSolution.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry<String, String> pair = (Map.Entry<String, String>)it.next();
+				callbackMessage newMessage = new callbackMessage();
+				newMessage.what = MESSAGE_READ;
+				newMessage.arg1 = REQUEST_CONNECT_AP;
+				newMessage.obj = pair.getKey();
+				manager.send(newMessage, pair.getValue());
+			}
+		}
 	}
 
 	@Override
@@ -864,7 +971,7 @@ BroadcastReceiver{
 
 
 		}
-		if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
+		if (action.equals("SCAN_RESULTS_AVAILABLE_ACTION")) {
 			updateWifiAPs(); 
 
 		}
@@ -875,11 +982,33 @@ BroadcastReceiver{
 	public void onGroupInfoAvailable(WifiP2pGroup group) {
 
 		groupedPeerList.clear();   // Clear All elements because the peer changed may be caused by peer disappearance
-		 // Add all peers found to the peerList 
-		for(peersim.core.Node cNode: group.getNodeList()){
+		// Add all peers found to the peerList 
+		for(Node cNode: group.getNodeList()){
 			WifiP2pDevice newDevice = new WifiP2pDevice(cNode, p2pInfoPid);
 			groupedPeerList.add(newDevice);
-		}       			
+		}  
+
+		// Update the WTA class as well - maybe a client left the group and is not available anymore
+		List<String> addressList = new ArrayList<String>();
+
+		// creating a list of all available clinet macaddress in this group
+		for(Node cNode: group.getNodeList()){
+			nodeP2pInfo cNodeInfo = (nodeP2pInfo) cNode.getProtocol(p2pInfoPid);
+			addressList.add(cNodeInfo.getMacAddress());
+		}
+		//check if every WTAclass in the WTAList is still available inside the group.
+		List<WTAClass> tempWTAClass = new ArrayList<WTAClass>();
+		for(WTAClass wtaIns: WTAList){
+			for(String macAddress:addressList){
+				if(macAddress.equals(wtaIns.getInterfaceName())){
+					tempWTAClass.add(wtaIns);
+					break;
+				}
+			}	
+		}
+		WTAList.clear();
+		WTAList.addAll(tempWTAClass);
+
 		appendStatus("Number of devices in the group: " + (groupedPeerList.size()+1)); 
 		appendStatus("Group SSID: " + group.getSSID());
 		appendStatus("Group PASS: " + group.getmPassphrase());
@@ -895,31 +1024,105 @@ BroadcastReceiver{
 			recordGroup.put("groupSSID", newGroup.getGroupSSID());
 			recordGroup.put("groupPass", newGroup.getGroupPassPhrase());
 			newGroup.setRecord(recordGroup);
-			
+
 			serviceGroup = new wifiP2pService(
 					newGroup.getGroupName(), SERVICE_REG_TYPE, newGroup.getRecord());	            
 			manager.addLocalService(serviceGroup);
 			appendStatus("Group Record Updated " + String.valueOf(newGroup.getGroupID()));
 			groupRecordUpdated = true;
-		}   
+		}
+
+		//		for(Node tempDevice: group.getNodeList()){
+		//			nodeP2pInfo tempDeviceInfo = (nodeP2pInfo) tempDevice.getProtocol(p2pInfoPid);
+		//			callbackMessage newMessage = new callbackMessage();
+		//			newMessage.what = MY_HANDLE;
+		//			newMessage.obj = nodeInfo.getMacAddress();
+		//			String receiverAdd = tempDeviceInfo.getMacAddress();
+		//			manager.send(newMessage, receiverAdd);
+		//		}
+
 	}
-		@Override
-		public void handleMessage(callbackMessage msg) {
-			switch (msg.what)
-			{
-			case MESSAGE_READ:
+
+	// when two devices (one group owner and one is client) connecting to each other the firsl message that is exchanging between thme is MY_HANDLE message. Here we undesrtand that the client is connected or the group owner has a new client
+	@Override
+	public void handleMessage(callbackMessage msg) {
+		if(msg==null)
+			return;
+		switch (msg.what){
+		case MESSAGE_READ:
+
+			switch (msg.arg1){
+			case REQUEST_AP_SEEN:
+				if(!isGroupOwner && isConnected && ((String) msg.obj).equals(goMacAddress)){ // reply to this only if you are a connected clinet to the GO which request this
+					//get the final list of APs around
+					List<ScanResult> currentApList = wifiManager.getScanResults();
+
+					WTAClass newWTA = new WTAClass(p2pMacAddress);
+					newWTA.setGroupSeen(currentApList);
+
+					callbackMessage newMessage = new callbackMessage();
+					newMessage.what = MESSAGE_READ;
+					newMessage.arg1 = CLIENT_AP_LIST;
+					newMessage.obj = newWTA;
+					manager.send(newMessage, (String) msg.obj);
+				}
 				break;
-			case MY_HANDLE:
+
+
+			case CLIENT_AP_LIST:
+				if(isGroupOwner && isConnected){
+
+					// check if the received WTA object has not been already available in the WTAList
+					// if it is available. first remove it and then add the updated version to the list
+					for (Iterator<WTAClass> wtaIterator = WTAList.iterator(); wtaIterator.hasNext();) {
+						WTAClass result = wtaIterator.next();
+						if (result.getInterfaceName().equals(((WTAClass) msg.obj).getInterfaceName())) {
+							// Remove the current element from the iterator and the list.
+							wtaIterator.remove();
+						}
+					}
+
+					WTAList.add((WTAClass) msg.obj);				
+					startWTAClaculation = true;
+				}
+				break;
+				
+			case REQUEST_CONNECT_AP:
+				Visualizer.print("REQUEST_CONNECT_AP Received: Node: " + thisNode.getID() + " Request Connection to: " + (String) msg.obj);
+				if(!isGroupOwner && isConnected){
+					WifiConfiguration wifiConfig = new WifiConfiguration();
+					wifiConfig.SSID = null;
+					// find the relevant SSID for received BSSID (msg.obj)
+					for(ScanResult apList: wifiManager.getScanResults()){
+						if(apList.BSSID.equals((String) msg.obj)){
+							wifiConfig.SSID = apList.SSID;
+						}
+					}
+					
+					if(wifiConfig.SSID!=null){
+						wifiManager.connect(wifiConfig);
+					}
+				}
 				break;
 			}
-
+			break;
+		case MY_HANDLE:
+			if(isGroupOwner){
+				callbackMessage newMessage = new callbackMessage();
+				newMessage.what = MESSAGE_READ;
+				newMessage.arg1 = REQUEST_AP_SEEN;
+				newMessage.obj = p2pMacAddress;
+				String Receiver = (String) msg.obj;
+				manager.send(newMessage, Receiver); 
+			}
+			break;
 		}
-
-		@Override
-		public void processEvent(peersim.core.Node arg0, int arg1, Object arg2) {
-			// TODO Auto-generated method stub
-			
-		}
-
 
 	}
+
+	@Override
+	public void processEvent(Node arg0, int arg1, Object arg2) {
+		// TODO Auto-generated method stub
+
+	}
+}

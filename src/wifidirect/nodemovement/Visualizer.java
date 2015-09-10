@@ -98,6 +98,7 @@ import peersim.core.Control;
 import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
+import wifi.WifiManager;
 import wifidirect.p2pcore.nodeP2pInfo;
 
 // TODO: Auto-generated Javadoc
@@ -105,134 +106,136 @@ import wifidirect.p2pcore.nodeP2pInfo;
  * The Class Visualizer.
  */
 public class Visualizer implements Control{
-	
+
 	/** The Constant CONNECTED. */
 	public static final int CONNECTED   = 0;
-	
+
 	/** The Constant INVITED. */
 	public static final int INVITED     = 1;
-	
+
 	/** The Constant FAILED. */
 	public static final int FAILED      = 2;
-	
+
 	/** The Constant AVAILABLE. */
 	public static final int AVAILABLE   = 3;
-	
+
 	/** The Constant UNAVAILABLE. */
 	public static final int UNAVAILABLE = 4;
-	
+
 	/** The Constant PAR_MANAGE. */
 	private static final String PAR_MANAGE = "p2pmanager";
-	
+
 	/** The Constant PAR_LINKABLE. */
 	private static final String PAR_LINKABLE = "linkable";
-	
+
 	/** The Constant PAR_P2PINFO. */
 	private static final String PAR_P2PINFO = "p2pinfo";
-	
+
 	/** The Constant PAR_TRASP. */
 	private static final String PAR_TRASP = "transport";
-	
+
 	/** The Constant PAR_CYCLE. */
 	private static final String PAR_CYCLE = "cyclelen";
-	
+
 	/** The Constant PAR_FIELD. */
 	private static final String PAR_FIELD = "fieldlen";
-	
+
 	/** The Constant PAR_GEPHI. */
 	private static final String PAR_GEPHI = "gephisize";
-	
+
 	/** The Constant PAR_MAXSPEED. */
 	private static final String PAR_MAXSPEED = "maxspeed";
-	
+
 	/** The Constant PAR_MINSPEED. */
 	private static final String PAR_MINSPEED = "minspeed";
-	
+
 	/** The Constant PAR_SHOW_GROUPS. */
 	private static final String PAR_SHOW_GROUPS = "showgroups";
-	
+
 	/** The coordinates pid. */
 	private int coordinatesPid;
-	
+
 	/** The transport id. */
 	private int transportId;
-	
+
 	/** The linkable id. */
 	private int linkableId;
-	
+
 	/** The p2pmanager id. */
 	private int p2pmanagerId;
-	
+
+	private int wifimanagerPid;
+
 	/** The p2p info pid. */
 	private int p2pInfoPid;
-	
+
 	/** The Cycle length. */
 	private int CycleLength;
-	
+
 	/** The Field length. */
 	private int FieldLength;
-	
+
 	/** The Gephi size. */
 	private int GephiSize;
-	
+
 	/** The maxspeed. */
 	private double maxspeed;
-	
+
 	/** The minspeed. */
 	private double minspeed;
-	
+
 	/** The showgroups. */
 	private boolean showgroups;
 
 	/** The show netwok image. */
 	private 			boolean 				showNetwokImage	= false;
-	
+
 	/** The start time real. */
 	private 			long 					startTimeReal 	= 0;
-	
+
 	/** The cycle. */
 	private 			long 					cycle 			= 0;
 
-	
+
 	/** The frame. */
 	private 			JFrame 					frame 			= null;
-	
+
 	/** The frame2. */
 	private 			JFrame 					frame2 			= null;
-	
+
 	/** The node. */
 	private 			Node 					node 			= null;
-	
+
 	/** The image. */
 	private				Image 					image			= null;
-	
+
 	/** The image2. */
 	private				Image 					image2			= null;
-	
+
 	/** The label. */
 	private				JLabel 					label			= null;
-	
+
 	/** The label2. */
 	private				JLabel 					label2			= null;
-	
+
 	/** The output. */
 	private static		JTextArea 				output			= null;
-	
+
 	/** The content pane. */
 	private 			JPanel 					contentPane		= null;
-	
+
 	/** The text field13. */
 	public static JTextField textField1, textField2, textField3, textField4, textField5, textField6, textField7, textField8, textField9, textField10, textField11, textField12, textField13;;
-	
+
 	/** The label field13. */
 	private static JLabel labelField1, labelField2, labelField3, labelField4, labelField5, labelField6, labelField7, labelField8, labelField9, labelField10, labelField11, labelField12, labelField13;
-	
+
 	/** The rules text15. */
 	public static JTextField rulesText1, rulesText2, rulesText3, rulesText4, rulesText5, rulesText6, rulesText7, rulesText8,
 	rulesText9, rulesText10, rulesText11, rulesText12, rulesText13, rulesText14, rulesText15;
-	
+
 	private static boolean scrollOutput = true;
-	
+
 	/**
 	 * Instantiates a new visualizer.
 	 *
@@ -243,6 +246,7 @@ public class Visualizer implements Control{
 		p2pInfoPid 		= Configuration.getPid(prefix + "." + PAR_P2PINFO);
 		linkableId 		= Configuration.getPid(prefix + "." + PAR_LINKABLE);
 		p2pmanagerId 	= Configuration.getPid(prefix + "." + PAR_MANAGE);
+		wifimanagerPid 	= Configuration.getPid(prefix + "." + "wifimanager");
 		CycleLength		= Configuration.getInt(prefix + "." + PAR_CYCLE);
 		FieldLength		= Configuration.getInt(prefix + "." + PAR_FIELD);
 		GephiSize		= Configuration.getInt(prefix + "." + PAR_GEPHI);
@@ -257,21 +261,21 @@ public class Visualizer implements Control{
 	@Override
 	public boolean execute() {
 		//System.out.println("Cycle: " + cycle + " time: " + CommonState.getTime() + " phase: " + CommonState.getPhase() + " int time: " + CommonState.getIntTime());
-		
+
 		if(cycle%5==0 && showgroups){
 			showGroups();
 		}
 		if(showNetwokImage){
 			showNetwork();
 		}
-		
+
 		// add cyclye in each round
-		if(cycle%10==0)	print(cycle);
-		
+		//if(cycle%10==0)	print(cycle);
+
 		if(cycle==1){
 			showFields();
 			rulesViolationCheck();
-			
+
 			labelField1.setText("Real Time(S): ");
 			labelField2.setText("Simulator Time(S): ");			
 			labelField3.setText("Max Speed(m/s): ");
@@ -290,17 +294,17 @@ public class Visualizer implements Control{
 			labelField13.setText("Mean Value: ");
 			startTimeReal = System.currentTimeMillis();	
 		}
-		
+
 		if(cycle>1){		
 			long connectedDevices = 0;
 			long noGroups = 0;
 			int maxClient = 0;
 			int maxNeighbor = 0;
-			
+
 			for(int i=0; i<Network.size(); i++){
 				nodeP2pInfo nodeInfo2 = (nodeP2pInfo) Network.get(i).getProtocol(p2pInfoPid);
 				Linkable neighbor = (Linkable) Network.get(i).getProtocol(linkableId);
-				
+
 				if(neighbor.degree()>maxNeighbor){
 					maxNeighbor = neighbor.degree();
 				}
@@ -314,7 +318,7 @@ public class Visualizer implements Control{
 					}
 				}
 			}	
-			
+
 			// calculate the real time
 			long elapsedTime = System.currentTimeMillis() - startTimeReal;
 			long elapsedSeconds = elapsedTime / 1000;
@@ -323,7 +327,7 @@ public class Visualizer implements Control{
 			int min = (int) remain/60;
 			int sec = (int) remain%60;
 			textField1.setText(String.valueOf(hour + ":" + min + ":" + sec));
-			
+
 			//calculate the simulator time
 			elapsedTime = (CycleLength * CommonState.getTime());
 			elapsedSeconds = elapsedTime / 1000;
@@ -332,7 +336,7 @@ public class Visualizer implements Control{
 			min = (int) remain/60;
 			sec = (int) remain%60;
 			textField2.setText(String.valueOf(hour + ":" + min + ":" + sec));
-			
+
 			textField5.setText(String.valueOf(Network.size()));
 			textField6.setText(String.valueOf(noGroups));
 			textField7.setText(String.valueOf(connectedDevices));
@@ -340,7 +344,7 @@ public class Visualizer implements Control{
 			textField9.setText(String.valueOf(maxNeighbor));
 			textField11.setText(String.valueOf(CommonState.getTime()));		
 		}
-		
+
 		cycle++;
 		return false;
 	}
@@ -358,7 +362,7 @@ public class Visualizer implements Control{
 
 			//label.setAutoscrolls(true);
 			if(frame==null){
-				
+
 				label = new JLabel(new ImageIcon(image));
 				frame = new JFrame();
 				contentPane = new JPanel();
@@ -385,7 +389,7 @@ public class Visualizer implements Control{
 
 				contentPane.add(label, BorderLayout.CENTER);
 				contentPane.add(scrollPane, BorderLayout.WEST);
-				
+
 				frame.setContentPane(contentPane);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -437,7 +441,7 @@ public class Visualizer implements Control{
 						frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 					}
 				});
-				
+
 				scrollOutput.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent actionEvent) {
 						if(Visualizer.scrollOutput){
@@ -463,28 +467,28 @@ public class Visualizer implements Control{
 		}
 	}
 
-//	public Visualizer clone(){
-//		Visualizer tf = null;
-//		try { tf = (Visualizer) super.clone(); }
-//		catch( CloneNotSupportedException e ) {} // never happen
-//		tf.newappId = newappId;
-//		tf.transportId = transportId;
-//		tf.p2pInfoPid = p2pInfoPid;
-//		tf.linkableId = linkableId;
-//		tf.p2pmanagerId = p2pmanagerId;
-//		tf.applicationId = applicationId;
-//		tf.CycleLength = CycleLength;
-//		tf.FieldLength = FieldLength;
-//		tf.GephiSize = GephiSize;
-//		tf.maxspeed = maxspeed;
-//		tf.minspeed = minspeed;
-//		return tf;	
-//	}
+	//	public Visualizer clone(){
+	//		Visualizer tf = null;
+	//		try { tf = (Visualizer) super.clone(); }
+	//		catch( CloneNotSupportedException e ) {} // never happen
+	//		tf.newappId = newappId;
+	//		tf.transportId = transportId;
+	//		tf.p2pInfoPid = p2pInfoPid;
+	//		tf.linkableId = linkableId;
+	//		tf.p2pmanagerId = p2pmanagerId;
+	//		tf.applicationId = applicationId;
+	//		tf.CycleLength = CycleLength;
+	//		tf.FieldLength = FieldLength;
+	//		tf.GephiSize = GephiSize;
+	//		tf.maxspeed = maxspeed;
+	//		tf.minspeed = minspeed;
+	//		return tf;	
+	//	}
 
 	/**
- * Show network.
- */
-@SuppressWarnings("rawtypes")
+	 * Show network.
+	 */
+	@SuppressWarnings("rawtypes")
 	public void showNetwork(){
 		// generating .gexf file using gexf library
 		Gexf gexf = new GexfImpl();
@@ -761,6 +765,7 @@ public class Visualizer implements Control{
 		for(int i=0; i<Network.size(); i++){
 			node = (Node) Network.get(i);
 			nodeP2pInfo nodeInfo = (nodeP2pInfo) node.getProtocol(p2pInfoPid);
+			WifiManager wifiManager = (WifiManager) node.getProtocol(wifimanagerPid);
 			CoordinateKeeper coordinate = (CoordinateKeeper) node.getProtocol(coordinatesPid);
 			PositionImpl nodePosition = new PositionImpl();
 			ColorImpl nodeColor = new ColorImpl();
@@ -768,6 +773,10 @@ public class Visualizer implements Control{
 				nodeColor.setB(0);
 				nodeColor.setG(255);
 				nodeColor.setR(0);
+			}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()==CONNECTED){
+				nodeColor.setB(255);
+				nodeColor.setG(0);
+				nodeColor.setR(255);	
 			}else if(!nodeInfo.isGroupOwner() && nodeInfo.getStatus()==CONNECTED){
 				nodeColor.setB(255);
 				nodeColor.setG(0);
@@ -855,33 +864,63 @@ public class Visualizer implements Control{
 			gephiMap.put((long) ((i+1)*1000), gephiNode.get(i));
 		}
 
-//		try{
-//			writer = new PrintWriter(new BufferedWriter(new FileWriter("log/nodeInfoObs.txt", true)));
-//		} catch (IOException e) {
-//		    System.out.println("File nodeInfoObs.txt not found");
-//		}
-		
-		
+		//		try{
+		//			writer = new PrintWriter(new BufferedWriter(new FileWriter("log/nodeInfoObs.txt", true)));
+		//		} catch (IOException e) {
+		//		    System.out.println("File nodeInfoObs.txt not found");
+		//		}
+
+
 		// create the gephi layer by setting the neighbors
 		for(int i=0; i<Network.size(); i++){
 			node = (Node) Network.get(i);
-			Linkable idlelink = (Linkable) node.getProtocol(linkableId);
-			nodeP2pInfo nodeInfo = (nodeP2pInfo) node.getProtocol(p2pInfoPid);
+			Linkable idlelink 			= (Linkable) node.getProtocol(linkableId);
+			nodeP2pInfo nodeInfo 		= (nodeP2pInfo) node.getProtocol(p2pInfoPid);
+			WifiManager wifiManager		= (WifiManager) node.getProtocol(wifimanagerPid);
+
 			for(int j=0; j<idlelink.degree(); j++){	
-				
+
 				//gephiNode.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(j).getID()));
 				nodeP2pInfo neighborInfo = (nodeP2pInfo) idlelink.getNeighbor(j).getProtocol(p2pInfoPid);
-				
-				
-				
+
 				// make edge based on the current group
+				// this node is group owner and connected to the second node via wifi p2p interface
 				if(nodeInfo.getStatus()==CONNECTED && nodeInfo.isGroupOwner() && 
 						nodeInfo.currentGroup.getNodeList().contains(idlelink.getNeighbor(j)) && neighborInfo.getGroupOwner()==node){
 					gephiNode.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(j).getID()));
+
+					// this node is not group owner and the second node is group owner for this node
 				}else if(!nodeInfo.isGroupOwner() && nodeInfo.getStatus()==CONNECTED && 
 						nodeInfo.getGroupOwner()==idlelink.getNeighbor(j) && 
 						neighborInfo.currentGroup.getNodeList().contains(node) && neighborInfo.isGroupOwner()){
 					gephiNode.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(j).getID()));
+				}
+			}
+			
+			// check again for wifi interface as well
+			for(int k=0; k<idlelink.degree(); k++){	
+
+				nodeP2pInfo neighborInfo = (nodeP2pInfo) idlelink.getNeighbor(k).getProtocol(p2pInfoPid);
+				WifiManager neighborWifiManager = (WifiManager) idlelink.getNeighbor(k).getProtocol(wifimanagerPid);
+
+
+				// this Node is group owner and the second node is connected to this node via WiFi Interface
+				if(nodeInfo.isGroupOwner() && 
+						nodeInfo.currentGroup.getNodeList().contains(idlelink.getNeighbor(k)) && 
+						neighborWifiManager.getWifiStatus()==CONNECTED && 
+						neighborWifiManager.apSSID.equals(nodeInfo.currentGroup.getSSID())){
+						
+					if(!gephiNode.get(i).hasEdgeTo(gephiMap.get(idlelink.getNeighbor(k).getID()).getId())){
+						gephiNode.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(k).getID()));
+					}
+
+					// this node (client or group owner) is connected via WiFi Interface to a Group Owner	
+				}else if(wifiManager.getWifiStatus() == CONNECTED && wifiManager.apSSID.equals(neighborInfo.currentGroup.getSSID())
+						&& neighborInfo.isGroupOwner() && neighborInfo.currentGroup.getNodeList().contains(node)){	
+					
+					if(!gephiNode.get(i).hasEdgeTo(gephiMap.get(idlelink.getNeighbor(k).getID()).getId())){
+						gephiNode.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(k).getID()));
+					}
 				}
 			}
 		}
@@ -895,7 +934,7 @@ public class Visualizer implements Control{
 				print("Nodes inside this Group: ");
 				for(Node tempNode: neighborInfo.currentGroup.getNodeList()){
 					print(tempNode.getID());
-					
+
 				}
 			}
 		}
@@ -1030,14 +1069,14 @@ public class Visualizer implements Control{
 		java.awt.Container content = frameField.getContentPane();
 		content.setLayout(new GridBagLayout());
 		content.setBackground(UIManager.getColor("control"));
-	    GridBagConstraints c = new GridBagConstraints();
-	    
-	    c.gridx = 0;
-	    c.gridy = GridBagConstraints.RELATIVE;
-	    c.gridwidth = 1;
-	    c.gridheight = 1;
-	    c.insets = new Insets(2, 2, 2, 2);
-	    c.anchor = GridBagConstraints.EAST;
+		GridBagConstraints c = new GridBagConstraints();
+
+		c.gridx = 0;
+		c.gridy = GridBagConstraints.RELATIVE;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		c.insets = new Insets(2, 2, 2, 2);
+		c.anchor = GridBagConstraints.EAST;
 
 		//JPanel Field1 = new JPanel(new BorderLayout());
 		labelField1 = new JLabel("Label 1", SwingConstants.RIGHT);
@@ -1053,7 +1092,7 @@ public class Visualizer implements Control{
 		labelField11 = new JLabel("Label 11", SwingConstants.RIGHT);
 		labelField12 = new JLabel("Label 12", SwingConstants.RIGHT);
 		labelField13 = new JLabel("Label 13", SwingConstants.RIGHT);
-		
+
 		content.add(labelField1, c);
 		labelField1.setDisplayedMnemonic('1');
 		content.add(labelField2, c);
@@ -1080,58 +1119,58 @@ public class Visualizer implements Control{
 		labelField12.setDisplayedMnemonic('C');
 		content.add(labelField13, c);
 		labelField13.setDisplayedMnemonic('D');
-		
-		 c.gridx = 1;
-		 c.gridy = 0;
-		 c.weightx = 1.0;
-		 c.fill = GridBagConstraints.HORIZONTAL;
-		 c.anchor = GridBagConstraints.CENTER;
-		 
-		 textField1 = new JTextField(15);
-		 textField2 = new JTextField(15);
-		 textField3 = new JTextField(15);
-		 textField4 = new JTextField(15);
-		 textField5 = new JTextField(15);
-		 textField6 = new JTextField(15);
-		 textField7 = new JTextField(15);
-		 textField8 = new JTextField(15);
-		 textField9 = new JTextField(15);
-		 textField10 = new JTextField(15);
-		 textField11 = new JTextField(15);
-		 textField12 = new JTextField(15);
-		 textField13 = new JTextField(15);
-		 
-		 content.add(textField1, c);
-		 textField1.setFocusAccelerator('1');
-		 c.gridx = 1;
-		 c.gridy = GridBagConstraints.RELATIVE;
-		 content.add(textField2, c);
-		 textField2.setFocusAccelerator('2');
-		 content.add(textField3, c);
-		 textField3.setFocusAccelerator('3');
-		 content.add(textField4, c);
-		 textField4.setFocusAccelerator('4');
-		 content.add(textField5, c);
-		 textField5.setFocusAccelerator('5');
-		 content.add(textField6, c);
-		 textField6.setFocusAccelerator('6');
-		 content.add(textField7, c);
-		 textField7.setFocusAccelerator('7');
-		 content.add(textField8, c);
-		 textField8.setFocusAccelerator('8');
-		 content.add(textField9, c);
-		 textField9.setFocusAccelerator('9');
-		 content.add(textField10, c);
-		 textField10.setFocusAccelerator('A');
-		 content.add(textField11, c);
-		 textField11.setFocusAccelerator('B');
-		 content.add(textField12, c);
-		 textField12.setFocusAccelerator('C');
-		 content.add(textField13, c);
-		 textField13.setFocusAccelerator('D');
-		 c.weightx = 0.0;
-		 c.fill = GridBagConstraints.NONE;
-		 
+
+		c.gridx = 1;
+		c.gridy = 0;
+		c.weightx = 1.0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.CENTER;
+
+		textField1 = new JTextField(15);
+		textField2 = new JTextField(15);
+		textField3 = new JTextField(15);
+		textField4 = new JTextField(15);
+		textField5 = new JTextField(15);
+		textField6 = new JTextField(15);
+		textField7 = new JTextField(15);
+		textField8 = new JTextField(15);
+		textField9 = new JTextField(15);
+		textField10 = new JTextField(15);
+		textField11 = new JTextField(15);
+		textField12 = new JTextField(15);
+		textField13 = new JTextField(15);
+
+		content.add(textField1, c);
+		textField1.setFocusAccelerator('1');
+		c.gridx = 1;
+		c.gridy = GridBagConstraints.RELATIVE;
+		content.add(textField2, c);
+		textField2.setFocusAccelerator('2');
+		content.add(textField3, c);
+		textField3.setFocusAccelerator('3');
+		content.add(textField4, c);
+		textField4.setFocusAccelerator('4');
+		content.add(textField5, c);
+		textField5.setFocusAccelerator('5');
+		content.add(textField6, c);
+		textField6.setFocusAccelerator('6');
+		content.add(textField7, c);
+		textField7.setFocusAccelerator('7');
+		content.add(textField8, c);
+		textField8.setFocusAccelerator('8');
+		content.add(textField9, c);
+		textField9.setFocusAccelerator('9');
+		content.add(textField10, c);
+		textField10.setFocusAccelerator('A');
+		content.add(textField11, c);
+		textField11.setFocusAccelerator('B');
+		content.add(textField12, c);
+		textField12.setFocusAccelerator('C');
+		content.add(textField13, c);
+		textField13.setFocusAccelerator('D');
+		c.weightx = 0.0;
+		c.fill = GridBagConstraints.NONE;
+
 
 		frameField.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frameField.pack();
@@ -1142,7 +1181,7 @@ public class Visualizer implements Control{
 		frameField.setTitle("Fields");
 		frameField.setVisible(true);	
 	}
-	
+
 	/**
 	 * Rules violation check.
 	 */
@@ -1154,14 +1193,14 @@ public class Visualizer implements Control{
 		java.awt.Container content = frameField.getContentPane();
 		content.setLayout(new GridBagLayout());
 		content.setBackground(UIManager.getColor("control"));
-	    GridBagConstraints c = new GridBagConstraints();
-	    
-	    c.gridx = 0;
-	    c.gridy = GridBagConstraints.RELATIVE;
-	    c.gridwidth = 1;
-	    c.gridheight = 1;
-	    c.insets = new Insets(2, 2, 2, 2);
-	    c.anchor = GridBagConstraints.EAST;
+		GridBagConstraints c = new GridBagConstraints();
+
+		c.gridx = 0;
+		c.gridy = GridBagConstraints.RELATIVE;
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		c.insets = new Insets(2, 2, 2, 2);
+		c.anchor = GridBagConstraints.EAST;
 
 		//JPanel Field1 = new JPanel(new BorderLayout());
 		rulesLabel1 = new JLabel("Rule 1", SwingConstants.RIGHT);
@@ -1179,7 +1218,7 @@ public class Visualizer implements Control{
 		rulesLabel13 = new JLabel("Rule 13", SwingConstants.RIGHT);
 		rulesLabel14 = new JLabel("Rule 14", SwingConstants.RIGHT);
 		rulesLabel15 = new JLabel("Rule 15", SwingConstants.RIGHT);
-		
+
 		content.add(rulesLabel1, c);
 		rulesLabel1.setDisplayedMnemonic('1');
 		content.add(rulesLabel2, c);
@@ -1210,81 +1249,81 @@ public class Visualizer implements Control{
 		rulesLabel14.setDisplayedMnemonic('E');
 		content.add(rulesLabel15, c);
 		rulesLabel15.setDisplayedMnemonic('F');
-		
-		 c.gridx = 1;
-		 c.gridy = 0;
-		 c.weightx = 1.0;
-		 c.fill = GridBagConstraints.HORIZONTAL;
-		 c.anchor = GridBagConstraints.CENTER;
-		 
-		 rulesText1 = new JTextField(15);
-		 rulesText2 = new JTextField(15);
-		 rulesText3 = new JTextField(15);
-		 rulesText4 = new JTextField(15);
-		 rulesText5 = new JTextField(15);
-		 rulesText6 = new JTextField(15);
-		 rulesText7 = new JTextField(15);
-		 rulesText8 = new JTextField(15);
-		 rulesText9 = new JTextField(15);
-		 rulesText10 = new JTextField(15);
-		 rulesText11 = new JTextField(15);
-		 rulesText12 = new JTextField(15);
-		 rulesText13 = new JTextField(15);
-		 rulesText14 = new JTextField(15);
-		 rulesText15 = new JTextField(15);
-		 
-		 content.add(rulesText1, c);
-		 rulesText1.setFocusAccelerator('1');
-		 c.gridx = 1;
-		 c.gridy = GridBagConstraints.RELATIVE;
-		 content.add(rulesText2, c);
-		 rulesText2.setFocusAccelerator('2');
-		 content.add(rulesText3, c);
-		 rulesText3.setFocusAccelerator('3');
-		 content.add(rulesText4, c);
-		 rulesText4.setFocusAccelerator('4');
-		 content.add(rulesText5, c);
-		 rulesText5.setFocusAccelerator('5');
-		 content.add(rulesText6, c);
-		 rulesText6.setFocusAccelerator('6');
-		 content.add(rulesText7, c);
-		 rulesText7.setFocusAccelerator('7');
-		 content.add(rulesText8, c);
-		 rulesText8.setFocusAccelerator('8');
-		 content.add(rulesText9, c);
-		 rulesText9.setFocusAccelerator('9');
-		 content.add(rulesText10, c);
-		 rulesText10.setFocusAccelerator('A');
-		 content.add(rulesText11, c);
-		 rulesText11.setFocusAccelerator('B');
-		 content.add(rulesText12, c);
-		 rulesText12.setFocusAccelerator('C');
-		 content.add(rulesText13, c);
-		 rulesText13.setFocusAccelerator('D');
-		 content.add(rulesText14, c);
-		 rulesText14.setFocusAccelerator('E');
-		 content.add(rulesText15, c);
-		 rulesText15.setFocusAccelerator('F');
-		 c.weightx = 0.0;
-		 c.fill = GridBagConstraints.NONE;
-		 
-		 rulesText1.setText(String.valueOf(0));
-		 rulesText2.setText(String.valueOf(0));
-		 rulesText3.setText(String.valueOf(0));
-		 rulesText4.setText(String.valueOf(0));
-		 rulesText5.setText(String.valueOf(0));
-		 rulesText6.setText(String.valueOf(0));
-		 rulesText7.setText(String.valueOf(0));
-		 rulesText8.setText(String.valueOf(0));
-		 rulesText9.setText(String.valueOf(0));
-		 rulesText10.setText(String.valueOf(0));
-		 //rulesText11.setText(String.valueOf(0));
+
+		c.gridx = 1;
+		c.gridy = 0;
+		c.weightx = 1.0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.CENTER;
+
+		rulesText1 = new JTextField(15);
+		rulesText2 = new JTextField(15);
+		rulesText3 = new JTextField(15);
+		rulesText4 = new JTextField(15);
+		rulesText5 = new JTextField(15);
+		rulesText6 = new JTextField(15);
+		rulesText7 = new JTextField(15);
+		rulesText8 = new JTextField(15);
+		rulesText9 = new JTextField(15);
+		rulesText10 = new JTextField(15);
+		rulesText11 = new JTextField(15);
+		rulesText12 = new JTextField(15);
+		rulesText13 = new JTextField(15);
+		rulesText14 = new JTextField(15);
+		rulesText15 = new JTextField(15);
+
+		content.add(rulesText1, c);
+		rulesText1.setFocusAccelerator('1');
+		c.gridx = 1;
+		c.gridy = GridBagConstraints.RELATIVE;
+		content.add(rulesText2, c);
+		rulesText2.setFocusAccelerator('2');
+		content.add(rulesText3, c);
+		rulesText3.setFocusAccelerator('3');
+		content.add(rulesText4, c);
+		rulesText4.setFocusAccelerator('4');
+		content.add(rulesText5, c);
+		rulesText5.setFocusAccelerator('5');
+		content.add(rulesText6, c);
+		rulesText6.setFocusAccelerator('6');
+		content.add(rulesText7, c);
+		rulesText7.setFocusAccelerator('7');
+		content.add(rulesText8, c);
+		rulesText8.setFocusAccelerator('8');
+		content.add(rulesText9, c);
+		rulesText9.setFocusAccelerator('9');
+		content.add(rulesText10, c);
+		rulesText10.setFocusAccelerator('A');
+		content.add(rulesText11, c);
+		rulesText11.setFocusAccelerator('B');
+		content.add(rulesText12, c);
+		rulesText12.setFocusAccelerator('C');
+		content.add(rulesText13, c);
+		rulesText13.setFocusAccelerator('D');
+		content.add(rulesText14, c);
+		rulesText14.setFocusAccelerator('E');
+		content.add(rulesText15, c);
+		rulesText15.setFocusAccelerator('F');
+		c.weightx = 0.0;
+		c.fill = GridBagConstraints.NONE;
+
+		rulesText1.setText(String.valueOf(0));
+		rulesText2.setText(String.valueOf(0));
+		rulesText3.setText(String.valueOf(0));
+		rulesText4.setText(String.valueOf(0));
+		rulesText5.setText(String.valueOf(0));
+		rulesText6.setText(String.valueOf(0));
+		rulesText7.setText(String.valueOf(0));
+		rulesText8.setText(String.valueOf(0));
+		rulesText9.setText(String.valueOf(0));
+		rulesText10.setText(String.valueOf(0));
+		//rulesText11.setText(String.valueOf(0));
 		// rulesText12.setText(String.valueOf(0));
-		 //rulesText13.setText(String.valueOf(0));
-		 //rulesText14.setText(String.valueOf(0));
+		//rulesText13.setText(String.valueOf(0));
+		//rulesText14.setText(String.valueOf(0));
 		// rulesText15.setText(String.valueOf(0));
-	
-		 
+
+
 
 		frameField.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frameField.pack();
@@ -1295,5 +1334,5 @@ public class Visualizer implements Control{
 		frameField.setTitle("Violation Check");
 		frameField.setVisible(true);	
 	}
-	
+
 }

@@ -17,8 +17,8 @@ CycleLenght 		100
 FieldLength 		1000.0
 
 ########### Max and Min speen in metter per second and radio range in meter
-SpeedMx 			5
-SpeedMn 			1
+SpeedMx 			0
+SpeedMn 			5
 Radio 				200.0
 
 ########### initial Ghephi Node size (huristic calculation)
@@ -28,10 +28,10 @@ gephiSize 			(FieldLength/20)
 RANGE 				(Radio/FieldLength)
 
 #Network Dynamic
-MIN_NET_SIZE 		50
-MAX_NET_SIZE 		200
+MIN_NET_SIZE 		100
+MAX_NET_SIZE 		150
 NET_ADD_STEP 		1
-SIN_PERIOD 			1000
+SIN_PERIOD 			10000
 NET_ADD_CYCLE_START 1
 NET_ADD_CYCLE_END 	simulation.endtime
 MAX_SPEED 			(SpeedMx*10*CycleLenght)/FieldLength
@@ -92,6 +92,7 @@ control.viz Visualizer
 	p2pinfo 		nodinf
 	linkable 		lnk
 	p2pmanager 		p2pmanager
+	wifimanager  	wifimanager
 	coord 			intcord
 	cyclelen		CycleLenght
 	fieldlen		FieldLength
@@ -168,6 +169,7 @@ protocol.proob ProximityObserver
 	transport2		utr2
 	listeners		lst
 	p2pmanager		p2pmanager
+	wifimanager		wifimanager
 	p2pinfo			nodinf
 	15sec			COEF15
 	step			1
@@ -181,6 +183,9 @@ protocol.wifimanager WifiManager
 	llmodel			llmodel
 	listeners		lst
 	transport1		utr1
+	transport4		utr4
+	transport5		tr5
+	p2pmanager		p2pmanager
 	step			1
 }
 

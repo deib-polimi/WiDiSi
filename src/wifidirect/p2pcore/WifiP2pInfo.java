@@ -20,8 +20,6 @@
  */
 package wifidirect.p2pcore;
 
-import peersim.core.Node;
-
 /**
  * The Class WifiP2pInfo. The same API as WiFi P2P API in Android.
  */
@@ -33,8 +31,12 @@ public class WifiP2pInfo {
     /**  Indicates if the current device is the group owner. */
     public boolean isGroupOwner;
 
-    /**  Group owner address. */
-    public Node groupOwnerAddress;
+    /**  Group owner address. 
+     * return {@link}peersim.core.Node
+     * 
+     * */
+    public String groupOwnerAddress;
+    
 
     /**
      * Instantiates a new wifi p2p info.
@@ -43,7 +45,7 @@ public class WifiP2pInfo {
      * @param isGroupOwner the is group owner
      * @param groupOwnerAddress the group owner address
      */
-    public WifiP2pInfo(boolean groupFormed, boolean isGroupOwner, Node groupOwnerAddress) {
+    public WifiP2pInfo(boolean groupFormed, boolean isGroupOwner, String groupOwnerAddress) {
     	this.groupFormed = groupFormed;
     	this.isGroupOwner = isGroupOwner;
     	this.groupOwnerAddress = groupOwnerAddress;

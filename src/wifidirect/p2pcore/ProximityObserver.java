@@ -29,6 +29,7 @@ import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
+import wifi.WifiManager;
 import wifidirect.nodemovement.Visualizer;
 
 
@@ -96,7 +97,8 @@ public class ProximityObserver implements EDProtocol, CDProtocol{
 	
 	/** The p2pmanager id. */
 	public int p2pmanagerId;
-
+	
+	private int wifimanager;
 
 	/**  A simulated 15 seconds for group formation *. */
 	public static final String PAR_15SEC = "15sec";
@@ -130,6 +132,7 @@ public class ProximityObserver implements EDProtocol, CDProtocol{
 		p2pInfoPid 		= Configuration.getPid(prefix + "." + PAR_P2PINFO);
 		p2pmanagerId 	= Configuration.getPid(prefix + "." + PAR_MANAGE);
 		a15Seconds 		= Configuration.getLong(prefix + "." + PAR_15SEC, 150);
+		wifimanager 	= Configuration.getPid(prefix + "." + "wifimanager");
 		preNeighborList = new ArrayList<Node>();
 	}
 
@@ -149,6 +152,7 @@ public class ProximityObserver implements EDProtocol, CDProtocol{
 		PO.p2pInfoPid 		= p2pInfoPid;
 		PO.a15Seconds 		= a15Seconds;
 		PO.p2pmanagerId		= p2pmanagerId;
+		PO.wifimanager		= wifimanager;
 		PO.preNeighborList 	= new ArrayList<Node>();
 		return PO;	
 	}
@@ -235,11 +239,26 @@ public class ProximityObserver implements EDProtocol, CDProtocol{
 				}
 				for (Node rNode: nodesToBeRemoved){
 					nodeInfo.currentGroup.removeNode(rNode);
+					
+					// remove p2p clients
 					nodeP2pInfo rNodeInfo = (nodeP2pInfo) rNode.getProtocol(p2pInfoPid);
 					if (rNodeInfo.getStatus()==CONNECTED && rNodeInfo.getGroupOwner().getID()==node.getID()){						
 						Message newMessage 	= new Message();
 						newMessage.destNode = rNode;
 						newMessage.destPid 	= p2pmanagerId;
+						newMessage.srcNode 	= node;
+						newMessage.srcPid 	= protocolID;
+						newMessage.event 	="REQUEST_CANCEL_CONNECT";
+						transport0.send(newMessage.srcNode, newMessage.destNode, newMessage, newMessage.destPid);
+					}
+					
+					// remove legacy wifi clients
+					WifiManager wifiManager = (WifiManager) rNode.getProtocol(wifimanager);
+					if(wifiManager.getWifiStatus()==CONNECTED && wifiManager.apSSID.equals(nodeInfo.currentGroup.getSSID())){
+						nodeInfo.currentGroup.removeNode(rNode);
+						Message newMessage 	= new Message();
+						newMessage.destNode = rNode;
+						newMessage.destPid 	= wifimanager;
 						newMessage.srcNode 	= node;
 						newMessage.srcPid 	= protocolID;
 						newMessage.event 	="REQUEST_CANCEL_CONNECT";

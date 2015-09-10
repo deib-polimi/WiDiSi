@@ -30,6 +30,7 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
+import wifidirect.nodemovement.Visualizer;
 
 
 // TODO: Auto-generated Javadoc
@@ -276,7 +277,7 @@ public class WifiP2pManager implements EDProtocol{
 					newMessage.srcPid 	= thisPid;
 					newMessage.event 	= "REQUEST_FOR_CONNECT";
 					transport0.send(newMessage.srcNode, newMessage.destNode, newMessage, newMessage.destPid);
-				}else { // if sorce intention is higher than this send your intention with NEGOTIATE_INTENT event
+				}else { // if source intention is higher than this send your intention with NEGOTIATE_INTENT event
 					// at the other side the above condition will meet
 					nodeInfo.setStatus(INVITED);
 					nodeInfo.setInvitedBy(message.srcNode);
@@ -369,9 +370,23 @@ public class WifiP2pManager implements EDProtocol{
 
 					callbackMessage cMessage = (callbackMessage) message.object;
 					if(msgHandler!=null){
+						
 						msgHandler.handleMessage(cMessage);
 					}
 				}
+			}
+			break;
+			
+		case "REQUEST_WIFI_CONNECT":
+			if(nodeInfo.isGroupOwner() && nodeInfo.currentGroup.getGroupSize()<=WifiP2pGroup.groupCapacity){
+				nodeInfo.currentGroup.addNode(message.srcNode);
+				Message newMessage 	= new Message();
+				newMessage.destNode = message.srcNode;
+				newMessage.destPid 	= message.srcPid;
+				newMessage.srcNode 	= thisNode;
+				newMessage.srcPid 	= thisPid;
+				newMessage.event 	= "CONNECTION_REQUEST_ACCEPTED";
+				transport5.send(newMessage.srcNode, newMessage.destNode, newMessage, newMessage.destPid);
 			}
 			break;
 		}
@@ -838,6 +853,7 @@ public class WifiP2pManager implements EDProtocol{
 			message.object 		= cMessage;
 			message.srcNode 	= thisNode;
 			message.srcPid 		= thisPid;
+			
 			transport3.send(message.srcNode, message.destNode, message, message.destPid);	
 			return "Message Sent!";
 		}else{

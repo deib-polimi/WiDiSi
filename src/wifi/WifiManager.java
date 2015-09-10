@@ -29,6 +29,7 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 import wifidirect.macphy.LowLayerModel;
+import wifidirect.nodemovement.Visualizer;
 import wifidirect.p2pcore.Message;
 import wifidirect.p2pcore.nodeP2pInfo;
 
@@ -60,16 +61,15 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	private int 	llmodelPid;
 	private int 	listenerPid;
 	private int 	transportId1;
+	private int		p2pmanagerId;
+	private int 	transportId4;
+	private int 	transportId5;
+
 	private static final int CONNECTED   = 0;
+	private static final int AVAILABLE   = 3;
 
-//	private static final int INVITED     = 1;
-//	private static final int FAILED      = 2;
-//	private static final int AVAILABLE   = 3;
-//	private static final int UNAVAILABLE = 4;
+	public List<ScanResult> ScanResultList;
 
-	public List<ScanResult> ScanResultList = new ArrayList<ScanResult>();
-	public List<ScanResult> preScanResultList = new ArrayList<ScanResult>();
-	
 	/*
 	 * This field indicates whether the WiFi scan has been initiated or not
 	 * This class check for changes in Wifi APs in the proximity if this field is true
@@ -77,17 +77,27 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	public 	boolean 	WifiScanEnable 	= false;
 	private boolean 	wifiEnabled 	= true;// indicates whether the wifi is enabled or disabled
 	private long 		cycle 			= 0;
+	public String 		apSSID			= null;
+	private Node 		thisNode 		= null;
+	private int 		thisPid 		= 0;
+	private int 		wifiStatus		= 3;
 
 	public WifiManager(String prefix) {
 		linkableId 	 = Configuration.getPid(prefix + "." + "linkable");
 		p2pInfoPid 	 = Configuration.getPid(prefix + "." + "p2pinfo");
-		llmodelPid = Configuration.getPid(prefix + "." + "llmodel");
+		llmodelPid 	 = Configuration.getPid(prefix + "." + "llmodel");
 		listenerPid  = Configuration.getPid(prefix + "." + "listeners");
 		transportId1 = Configuration.getPid(prefix + "." + "transport1");
+		transportId4 = Configuration.getPid(prefix + "." + "transport4");
+		transportId5 = Configuration.getPid(prefix + "." + "transport5");
+		p2pmanagerId = Configuration.getPid(prefix + "." + "p2pmanager");
+		ScanResultList = new ArrayList<ScanResult>();
 	}
 
 	@Override
 	public void nextCycle(Node node, int pid) {
+		thisNode = node;
+		thisPid = pid;
 		if(WifiScanEnable && cycle%20==0){
 			Transport transport1 = (Transport) node.getProtocol(transportId1);
 			ScanResultList.clear();
@@ -103,32 +113,47 @@ public class WifiManager implements EDProtocol, CDProtocol{
 					accessPoint.timestamp = System.currentTimeMillis();					
 					accessPoint.level = llmodel.getRSSIdbm(node, neighbor.getNeighbor(i));   // RSSI in dbm
 					ScanResultList.add(accessPoint);
+					//Visualizer.print("AP: " + accessPoint.SSID + " added to the list of: " + thisNode.getID());
 				}
 			}
 			// now we have to check if any new thing is added to the scan list
 			if(!ScanResultList.isEmpty()){
-				for(int j=0; j<ScanResultList.size(); j++){
-					if(!preScanResultList.contains(ScanResultList.get(j))){
-						// A new AP has been detected, infor the eventListeners to broadcst it
-						// this action should be performned for each newly found AP
-						Message newMessage 	= new Message();
-						newMessage.destNode = node;
-						newMessage.destPid 	= listenerPid;
-						newMessage.srcNode 	= node;
-						newMessage.srcPid 	= pid;
-						newMessage.event 	= "SCAN_RESULTS_AVAILABLE_ACTION";
-						newMessage.object 	= ScanResultList.get(j);
-						transport1.send(newMessage.srcNode, newMessage.destNode, newMessage, newMessage.destPid);					
-					}
-				}
+				// A new AP has been detected, infor the eventListeners to broadcst it
+				// this action should be performned for each newly found AP
+				Message newMessage 	= new Message();
+				newMessage.destNode = node;
+				newMessage.destPid 	= listenerPid;
+				newMessage.srcNode 	= node;
+				newMessage.srcPid 	= pid;
+				newMessage.event 	= "SCAN_RESULTS_AVAILABLE_ACTION";
+				newMessage.object 	= ScanResultList;
+				transport1.send(newMessage.srcNode, newMessage.destNode, newMessage, newMessage.destPid);					
 			}
-			// refresh the content of pre Scan result list with new values for next round
-			preScanResultList.clear();
-			preScanResultList.addAll(ScanResultList);
 		}
 		cycle++;
 	}
 
+	@Override
+	public void processEvent(Node node, int pid, Object event) {
+		Message 	message 	= (Message) 	event;
+		nodeP2pInfo senderInfo 	= (nodeP2pInfo) message.srcNode.getProtocol(p2pInfoPid);
+
+		switch (message.event){
+		case "CONNECTION_REQUEST_ACCEPTED":	
+			apSSID = senderInfo.currentGroup.getSSID();
+			setWifiStatus(CONNECTED);
+			break;
+
+		case "REQUEST_CANCEL_CONNECT":
+			setWifiStatus(AVAILABLE);
+			apSSID = null;
+			break;
+
+		case "SOCKET_DELIVERY":
+
+			break;
+		}
+	}
 
 	public WifiManager clone(){
 		WifiManager wfm = null;
@@ -139,10 +164,166 @@ public class WifiManager implements EDProtocol, CDProtocol{
 		wfm.llmodelPid = llmodelPid;
 		wfm.listenerPid = listenerPid;
 		wfm.transportId1 = transportId1;
+		wfm.p2pmanagerId = p2pmanagerId;
+		wfm.transportId4 = transportId4;
+		wfm.transportId5 = transportId5;
+		wfm.ScanResultList = new ArrayList<ScanResult>();
 		return wfm;
 	}
 
 
+	/**
+	 * Request a scan for access points. Returns immediately. The availability
+	 * of the results is made known later by means of an asynchronous event sent
+	 * on completion of the scan.
+	 * @return {@code true} if the operation succeeded, i.e., the scan was initiated
+	 */
+	public boolean startScan() {
+		// Here we will continiuosly check for other APs around.
+		// another Control Unit check this boolean field in each round and if it is enabled will update the list of APs
+		WifiScanEnable = true;
+		return WifiScanEnable;
+	}
+
+	/**
+	 * Return the results of the latest access point scan.
+	 * @return the list of access points found in the most recent scan.
+	 */
+	public List<ScanResult> getScanResults() {
+		return ScanResultList;
+	}
+
+	/**
+	 * Return the DHCP-assigned addresses from the last successful DHCP request,
+	 * if any.
+	 * @return the DHCP information
+	 */
+	public DhcpInfo getDhcpInfo() {
+		DhcpInfo newDhcpInfo = new DhcpInfo();
+		// this object should be completed later 
+		// for now we do not need it since we only want to connect and we do not want to communicate
+		// later we will complete this
+		return newDhcpInfo;
+	}
+
+	/**
+	 * Enable or disable Wi-Fi.
+	 * @param enabled {@code true} to enable, {@code false} to disable.
+	 * @return {@code true} if the operation succeeds (or if the existing state
+	 *         is the same as the requested state).
+	 */
+	public boolean setWifiEnabled(boolean enabled) {
+		wifiEnabled = enabled;
+		return true;
+	}
+
+	public void connect(WifiConfiguration config) {
+		Node destNode= null;
+		Linkable neighbor = (Linkable) thisNode.getProtocol(linkableId);
+		for(int i=0; i<neighbor.degree(); i++){
+			nodeP2pInfo neighborInfo = (nodeP2pInfo) neighbor.getNeighbor(i).getProtocol(p2pInfoPid);
+			if(neighborInfo.currentGroup!=null && neighborInfo.currentGroup.isGroupValid()){
+				if(neighborInfo.currentGroup.getSSID().equals(config.SSID)){
+					destNode = neighbor.getNeighbor(i);
+					break;
+				}
+			}
+		}
+		if(destNode!=null){
+			Transport transport4 = (Transport) thisNode.getProtocol(transportId4);
+			Message newMessage 	= new Message();
+			newMessage.destNode = destNode;
+			newMessage.destPid 	= p2pmanagerId;
+			newMessage.srcNode 	= thisNode;
+			newMessage.srcPid 	= thisPid;
+			newMessage.event 	= "REQUEST_WIFI_CONNECT";
+			transport4.send(newMessage.srcNode, newMessage.destNode, newMessage, newMessage.destPid);
+		}
+	}
+
+	public void cancelConnect(){
+		if(getWifiStatus()==CONNECTED){
+			Node destNode= null;
+			Linkable neighbor = (Linkable) thisNode.getProtocol(linkableId);
+			for(int i=0; i<neighbor.degree(); i++){
+				nodeP2pInfo neighborInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
+				if(neighborInfo.currentGroup.getSSID().equals(apSSID)){
+					destNode = neighbor.getNeighbor(i);
+					break;
+				}
+			}
+
+			Transport transport5 = (Transport) thisNode.getProtocol(transportId5);
+			Message newMessage 	= new Message();
+			newMessage.destNode = destNode;
+			newMessage.destPid 	= p2pmanagerId;
+			newMessage.srcNode 	= thisNode;
+			newMessage.srcPid 	= thisPid;
+			newMessage.event 	= "REQUEST_CANCEL_CONNECT";
+			transport5.send(newMessage.srcNode, newMessage.destNode, newMessage, newMessage.destPid);
+
+			setWifiStatus(AVAILABLE);
+			apSSID = null;
+		}
+	}
+	/**
+	 * Return whether Wi-Fi is enabled or disabled.
+	 * @return {@code true} if Wi-Fi is enabled
+	 * @see #getWifiState()
+	 */
+	public boolean isWifiEnabled() {
+		// return getWifiState() == WIFI_STATE_ENABLED;
+		return isWifiEnabled();
+	}
+	/**
+	 * Calculates the level of the signal. This should be used any time a signal
+	 * is being shown.
+	 *
+	 * @param rssi The power of the signal measured in RSSI.
+	 * @param numLevels The number of levels to consider in the calculated
+	 *            level.
+	 * @return A level of the signal, given in the range of 0 to numLevels-1
+	 *         (both inclusive).
+	 */
+	public static int calculateSignalLevel(int rssi, int numLevels) {
+		if (rssi <= MIN_RSSI) {
+			return 0;
+		} else if (rssi >= MAX_RSSI) {
+			return numLevels - 1;
+		} else {
+			float inputRange = (MAX_RSSI - MIN_RSSI);
+			float outputRange = (numLevels - 1);
+			return (int)((float)(rssi - MIN_RSSI) * outputRange / inputRange);
+		}
+	}
+
+	/**
+	 * Compares two signal strengths.
+	 *
+	 * @param rssiA The power of the first signal measured in RSSI.
+	 * @param rssiB The power of the second signal measured in RSSI.
+	 * @return Returns <0 if the first signal is weaker than the second signal,
+	 *         0 if the two signals have the same strength, and >0 if the first
+	 *         signal is stronger than the second signal.
+	 */
+	public static int compareSignalLevel(int rssiA, int rssiB) {
+		return rssiA - rssiB;
+	}
+
+	/**
+	 * Return whether Wi-Fi AP is enabled or disabled.
+	 * @return {@code true} if Wi-Fi AP is enabled
+	 * @see #getWifiApState()
+	 *
+	 * @hide Dont open yet
+	 */
+	public boolean isWifiApEnabled() {
+		if(wifiEnabled){
+			return true;
+		}else{
+			return false;
+		}
+	}
 
 	// Supplicant error codes:
 	/**
@@ -618,21 +799,21 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	//private static final int MAX_ACTIVE_LOCKS = 50;
 
 	/* Number of currently active WifiLocks and MulticastLocks */
-//	private int mActiveLockCount;
-//
-//	//private Context mContext;
-//	//IWifiManager mService;
-//
-//	private static final int INVALID_KEY = 0;
-//	private static int sListenerKey = 1;
-//	//private static final SparseArray sListenerMap = new SparseArray();
-//	private static final Object sListenerMapLock = new Object();
-//
-//	//private static AsyncChannel sAsyncChannel;
-//	private static CountDownLatch sConnected;
-//
-//	private static final Object sThreadRefLock = new Object();
-//	private static int sThreadRefCount;
+	//	private int mActiveLockCount;
+	//
+	//	//private Context mContext;
+	//	//IWifiManager mService;
+	//
+	//	private static final int INVALID_KEY = 0;
+	//	private static int sListenerKey = 1;
+	//	//private static final SparseArray sListenerMap = new SparseArray();
+	//	private static final Object sListenerMapLock = new Object();
+	//
+	//	//private static AsyncChannel sAsyncChannel;
+	//	private static CountDownLatch sConnected;
+	//
+	//	private static final Object sThreadRefLock = new Object();
+	//	private static int sThreadRefCount;
 	//private static HandlerThread sHandlerThread;
 
 	/**
@@ -1054,20 +1235,7 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	//        return null;
 	//    }
 
-	/**
-	 * Request a scan for access points. Returns immediately. The availability
-	 * of the results is made known later by means of an asynchronous event sent
-	 * on completion of the scan.
-	 * @return {@code true} if the operation succeeded, i.e., the scan was initiated
-	 */
 
-
-	public boolean startScan() {
-		// Here we will continiuosly check for other APs around.
-		// another Control Unit check this boolean field in each round and if it is enabled will update the list of APs
-		WifiScanEnable = true;
-		return WifiScanEnable;
-	}
 
 
 
@@ -1253,13 +1421,7 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	//        }
 	//    }
 
-	/**
-	 * Return the results of the latest access point scan.
-	 * @return the list of access points found in the most recent scan.
-	 */
-	public List<ScanResult> getScanResults() {
-		return ScanResultList;
-	}
+
 
 	/**
 	 * Check if scanning is always available.
@@ -1348,29 +1510,7 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	//        }
 	//    }
 
-	/**
-	 * Return the DHCP-assigned addresses from the last successful DHCP request,
-	 * if any.
-	 * @return the DHCP information
-	 */
-	public DhcpInfo getDhcpInfo() {
-		DhcpInfo newDhcpInfo = new DhcpInfo();
-		// this object should be completed later 
-		// for now we do not need it since we only want to connect and we do not want to communicate
-		// later we will complete this
-		return newDhcpInfo;
-	}
 
-	/**
-	 * Enable or disable Wi-Fi.
-	 * @param enabled {@code true} to enable, {@code false} to disable.
-	 * @return {@code true} if the operation succeeds (or if the existing state
-	 *         is the same as the requested state).
-	 */
-	public boolean setWifiEnabled(boolean enabled) {
-		wifiEnabled = enabled;
-		return true;
-	}
 
 	/**
 	 * Gets the Wi-Fi enabled state.
@@ -1387,15 +1527,7 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	//        }
 	//    }
 
-	/**
-	 * Return whether Wi-Fi is enabled or disabled.
-	 * @return {@code true} if Wi-Fi is enabled
-	 * @see #getWifiState()
-	 */
-	public boolean isWifiEnabled() {
-		// return getWifiState() == WIFI_STATE_ENABLED;
-		return isWifiEnabled();
-	}
+
 
 	/**
 	 * Return TX packet counter, for CTS test of WiFi watchdog.
@@ -1408,40 +1540,7 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	//        sAsyncChannel.sendMessage(RSSI_PKTCNT_FETCH, 0, putListener(listener));
 	//    }
 
-	/**
-	 * Calculates the level of the signal. This should be used any time a signal
-	 * is being shown.
-	 *
-	 * @param rssi The power of the signal measured in RSSI.
-	 * @param numLevels The number of levels to consider in the calculated
-	 *            level.
-	 * @return A level of the signal, given in the range of 0 to numLevels-1
-	 *         (both inclusive).
-	 */
-	public static int calculateSignalLevel(int rssi, int numLevels) {
-		if (rssi <= MIN_RSSI) {
-			return 0;
-		} else if (rssi >= MAX_RSSI) {
-			return numLevels - 1;
-		} else {
-			float inputRange = (MAX_RSSI - MIN_RSSI);
-			float outputRange = (numLevels - 1);
-			return (int)((float)(rssi - MIN_RSSI) * outputRange / inputRange);
-		}
-	}
 
-	/**
-	 * Compares two signal strengths.
-	 *
-	 * @param rssiA The power of the first signal measured in RSSI.
-	 * @param rssiB The power of the second signal measured in RSSI.
-	 * @return Returns <0 if the first signal is weaker than the second signal,
-	 *         0 if the two signals have the same strength, and >0 if the first
-	 *         signal is stronger than the second signal.
-	 */
-	public static int compareSignalLevel(int rssiA, int rssiB) {
-		return rssiA - rssiB;
-	}
 
 	/**
 	 * Start AccessPoint mode with the specified
@@ -1481,20 +1580,7 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	//        }
 	//    }
 
-	/**
-	 * Return whether Wi-Fi AP is enabled or disabled.
-	 * @return {@code true} if Wi-Fi AP is enabled
-	 * @see #getWifiApState()
-	 *
-	 * @hide Dont open yet
-	 */
-	public boolean isWifiApEnabled() {
-		if(wifiEnabled){
-			return true;
-		}else{
-			return false;
-		}
-	}
+
 
 	/**
 	 * Gets the Wi-Fi AP Configuration.
@@ -1629,6 +1715,14 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	//            // Just ignore the exception
 	//        }
 	//    }
+
+	public int getWifiStatus() {
+		return wifiStatus;
+	}
+
+	public void setWifiStatus(int wifiStatus) {
+		this.wifiStatus = wifiStatus;
+	}
 
 	/**
 	 * Similar to {@link #setTdlsEnabled(InetAddress, boolean) }, except
@@ -1796,11 +1890,7 @@ public class WifiManager implements EDProtocol, CDProtocol{
 		public void onFailure(int reason);
 	}
 
-	@Override
-	public void processEvent(Node arg0, int arg1, Object arg2) {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	//    private static class ServiceHandler extends Handler {
 	//        ServiceHandler(Looper looper) {
@@ -1977,24 +2067,7 @@ public class WifiManager implements EDProtocol, CDProtocol{
 	//                putListener(listener), config);
 	//    }
 
-	/**
-	 * Connect to a network with the given networkId.
-	 *
-	 * This function is used instead of a enableNetwork(), saveConfiguration() and
-	 * reconnect()
-	 *
-	 * @param networkId the network id identifiying the network in the
-	 *                supplicant configuration list
-	 * @param listener for callbacks on success or failure. Can be null.
-	 * @throws IllegalStateException if the WifiManager instance needs to be
-	 * initialized again
-	 * @hide
-	 */
-	//    public void connect(int networkId, ActionListener listener) {
-	//        if (networkId < 0) throw new IllegalArgumentException("Network id cannot be negative");
-	//        validateChannel();
-	//        sAsyncChannel.sendMessage(CONNECT_NETWORK, networkId, putListener(listener));
-	//    }
+
 
 	/**
 	 * Save the given network in the supplicant config. If the network already

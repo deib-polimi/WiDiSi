@@ -382,9 +382,12 @@ public class eventListeners implements EDProtocol {
 	 */
 	private void notifyConInfoListeners(String action) {
 		nodeP2pInfo nodeInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
-		WifiP2pInfo wifiInfo = new WifiP2pInfo((nodeInfo.getStatus()==CONNECTED), nodeInfo.isGroupOwner(), nodeInfo.getGroupOwner());
-		for (ConnectionInfoListener conListener: cListeners) {
-			conListener.onConnectionInfoAvailable(wifiInfo);
+		if(nodeInfo.getGroupOwner()!=null){
+			nodeP2pInfo GOInfo = (nodeP2pInfo) nodeInfo.getGroupOwner().getProtocol(p2pInfoPid);
+			WifiP2pInfo wifiInfo = new WifiP2pInfo((nodeInfo.getStatus()==CONNECTED), nodeInfo.isGroupOwner(), GOInfo.getMacAddress());
+			for (ConnectionInfoListener conListener: cListeners) {
+				conListener.onConnectionInfoAvailable(wifiInfo);
+			}
 		}
 	}
 

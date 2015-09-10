@@ -11,14 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Node {
+public class wtaNode {
 	public String nodeName = "Initial";
-	public List<Node> childNodeList;
+	public List<wtaNode> childNodeList;
 	//public ArrayList<String> interfaceList;
 	
-	public Node(String name){
+	public wtaNode(String name){
 		nodeName=name;
-		childNodeList = new ArrayList<Node>();
+		childNodeList = new ArrayList<wtaNode>();
 		//interfaceList = new ArrayList<String>();
 	}
 	

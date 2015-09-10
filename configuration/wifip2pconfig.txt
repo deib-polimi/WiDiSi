@@ -141,6 +141,8 @@ protocol.wifimanager WifiManager
 	llmodel			llmodel
 	listeners		lst
 	transport1		utr1
+	transport4		utr4
+	p2pmanager		p2pmanager
 	step			1
 }
 

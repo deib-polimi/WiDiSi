@@ -32,11 +32,6 @@ public class ScanResult{
     public String SSID;
 
     /**
-     * Ascii encoded SSID. This will replace SSID when we deprecate it. @hide
-     */
-    public WifiSsid wifiSsid;
-
-    /**
      * The address of the access point.
      */
     public String BSSID;
@@ -224,10 +219,9 @@ public class ScanResult{
     public InformationElement informationElements[];
 
     /** {@hide} */
-    public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
+    public ScanResult(String SSID, String BSSID, String caps, int level, int frequency,
             long tsf) {
-        this.wifiSsid = wifiSsid;
-        this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
+        this.SSID = SSID;
         this.BSSID = BSSID;
         this.capabilities = caps;
         this.level = level;
@@ -238,10 +232,9 @@ public class ScanResult{
     }
 
     /** {@hide} */
-    public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
+    public ScanResult(String SSID, String BSSID, String caps, int level, int frequency,
             long tsf, int distCm, int distSdCm) {
-        this.wifiSsid = wifiSsid;
-        this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
+        this.SSID = SSID;
         this.BSSID = BSSID;
         this.capabilities = caps;
         this.level = level;
@@ -254,7 +247,6 @@ public class ScanResult{
     /** copy constructor {@hide} */
     public ScanResult(ScanResult source) {
         if (source != null) {
-            wifiSsid = source.wifiSsid;
             SSID = source.SSID;
             BSSID = source.BSSID;
             capabilities = source.capabilities;
@@ -286,7 +278,7 @@ public class ScanResult{
         String none = "<none>";
 
         sb.append("SSID: ").
-            append(wifiSsid == null ? WifiSsid.NONE : wifiSsid).
+            append(SSID == null ? WifiSsid.NONE : SSID).
             append(", BSSID: ").
             append(BSSID == null ? none : BSSID).
             append(", capabilities: ").
