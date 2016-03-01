@@ -37,8 +37,11 @@ import peersim.core.Node;
  */
 public class WifiP2pGroup {
 	
-	private String SSID;
-	private String BSSID;
+	/** SSID is equal to the mInterface */
+	public String SSID;
+	
+	/** BSSID is the MAC address */
+	public String BSSID;
 
 	// Fields related to group Info
 	/** The node list. */
@@ -208,6 +211,7 @@ public class WifiP2pGroup {
 	 */
 	public void setmInterface(String mInterface) {
 		this.mInterface = mInterface;
+		SSID = mInterface;
 	}
 
 	/**

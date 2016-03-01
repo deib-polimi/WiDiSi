@@ -47,7 +47,7 @@ public class CoordinateKeeper implements Protocol {
     
     /** The mobile. */
     // If the node is mobile set this to true
-    private boolean mobile = false;
+    private boolean mobile;
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -63,7 +63,9 @@ public class CoordinateKeeper implements Protocol {
      */
     public CoordinateKeeper(String prefix) {
         /* Un-initialized coordinates defaults to -1. */
-        x = y = -1;
+        x = -1;
+        y = -1;
+        mobile = false;
     }
 
     /* (non-Javadoc)
@@ -74,6 +76,9 @@ public class CoordinateKeeper implements Protocol {
         try {
             inp = (CoordinateKeeper) super.clone();
         } catch (CloneNotSupportedException e) {} // never happens
+        inp.x = -1;
+        inp.y = -1;
+        inp.mobile = false;
         return inp;
     }
 

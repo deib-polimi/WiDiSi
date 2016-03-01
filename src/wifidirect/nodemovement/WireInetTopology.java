@@ -33,18 +33,6 @@ import peersim.graph.Graph;
  * @author Naser Derakhshan
  */
 public class WireInetTopology extends WireGraph {
-	// ------------------------------------------------------------------------
-	// Parameters
-	// ------------------------------------------------------------------------
-	/**
-	 * The coordinate protocol to look at.
-	 * 
-	 * @config
-	 */
-	private static final String PAR_COORDINATES_PROT = "coord_protocol";
-
-	/**  WiFi Range. */
-	private static final String PAR_RANGE = "radio_range";
 
 	// --------------------------------------------------------------------------
 	// Fields
@@ -52,9 +40,6 @@ public class WireInetTopology extends WireGraph {
 
 	/** Coordinate protocol pid. */
 	private final int coordPid;
-
-	/**  Wifi radio Range. */
-	private final double radio_range;
 
 	// --------------------------------------------------------------------------
 	// Initialization
@@ -69,8 +54,7 @@ public class WireInetTopology extends WireGraph {
 	 */
 	public WireInetTopology(String prefix) {
 		super(prefix);
-		coordPid = Configuration.getPid(prefix + "." + PAR_COORDINATES_PROT);
-		radio_range = Configuration.getDouble(prefix + "." + PAR_RANGE, 0.2);
+		coordPid = Configuration.getPid(prefix + "." + "coord_protocol");
 	}
 
 	/**
@@ -79,7 +63,7 @@ public class WireInetTopology extends WireGraph {
 	 */
 	public void wire(Graph g) {
 
-		GraphFactoryM.wireCordXY(g, coordPid, radio_range);
+		GraphFactoryM.wireCordXY(g, coordPid, (NodeMovement.radio/NodeMovement.FieldLength));
 
 	}
 }

@@ -66,15 +66,13 @@ public class nodeP2pInfo implements Protocol{
 	private ArrayList<wifiP2pService> wifiP2pServiceList;
 
 	/** A boolean which shows whether Wifi P2P has been enabled or not. */
-	private boolean wifiP2pEnabled = true;
+	private boolean wifiP2pEnabled;
 
 	/** This will be set by the wifi P2P manager when the user request start Peer discovery. */
-	private boolean peerDiscoveryStarted = false;
+	private boolean peerDiscoveryStarted;
 
 	/** This will be set by the wifi P2P manager when the user request start service discovery. */
-	private boolean serviceDiscoveryStarted = false;
-
-
+	private boolean serviceDiscoveryStarted;
 
 	/**
 	 * The Pwifi p2p enabled.
@@ -82,19 +80,17 @@ public class nodeP2pInfo implements Protocol{
 	 * @hide these field keep the previous status of the mentioned signals
 	 * they are necessary for edge detection
 	 */
-	private boolean PwifiP2pEnabled = true;
+	private boolean PwifiP2pEnabled;
 
 	/** The Ppeer discovery started. */
-	private boolean PpeerDiscoveryStarted = false;
+	private boolean PpeerDiscoveryStarted;
 
 	/** The Pservicediscovery started. */
-	private boolean PservicediscoveryStarted = false;	
+	private boolean PservicediscoveryStarted;	
 
 	/** The Current group Only Group Owner keep the current group The clients ask the group owner for group information. */
-	public WifiP2pGroup currentGroup=null;
+	public WifiP2pGroup currentGroup;
 
-	/** The maximum number of clients that a Group owner can have at the same time. */
-	//private static final int groupLimit = 10;
 	/**The maximum number of peers that each device may be able to descover*/
 	public static final int maxNumDevices = 50;
 
@@ -117,14 +113,14 @@ public class nodeP2pInfo implements Protocol{
 	public static final int UNAVAILABLE = 4;
 
 	/**  Device connection status. */
-	private int status = AVAILABLE;
+	private int status;
 
 	/**
 	 * The pstatus.
 	 *
 	 * @hide for signal edge detection
 	 */
-	private int pstatus = AVAILABLE;
+	private int pstatus;
 
 
 	/** Linkable protocol *. */
@@ -158,7 +154,7 @@ public class nodeP2pInfo implements Protocol{
 	public int listenerPid;
 
 	/** thisNode is the current node which will be set by a Initializer. */
-	public Node thisNode = Network.get(0);
+	public Node thisNode;
 
 	/** The this pid. */
 	public static int thisPid = 0;
@@ -167,10 +163,10 @@ public class nodeP2pInfo implements Protocol{
 	private Node groupOwner;
 
 	/** The return state. */
-	private boolean returnState=false;
+	private boolean returnState;
 
 	/** The extra wifi state. */
-	public int EXTRA_WIFI_STATE = 2;
+	public int EXTRA_WIFI_STATE;
 
 	/** The Constant WIFI_P2P_STATE_DISABLED. */
 	public static final int WIFI_P2P_STATE_DISABLED = 1;
@@ -179,25 +175,38 @@ public class nodeP2pInfo implements Protocol{
 	public static final int WIFI_P2P_STATE_ENABLED = 2;
 
 	/** The invited by. */
-	private Node invitedBy= null;
+	private Node invitedBy;
 	
 	/** The invitation time. */
-	private long invitationTime=0;
+	private long invitationTime;
 	/**
 	 * Instantiates a new node p2p info.
 	 *
 	 * @param prefix the prefix
 	 */
 	public nodeP2pInfo (String prefix){
-		linkableId = Configuration.getPid(prefix + "." + PAR_PROTOCOL);
-
-		transportId5 = Configuration.getPid(prefix + "." + PAR_TRASP_5);
-		transportId2 = Configuration.getPid(prefix + "." + PAR_TRASP_2);
-		transportId1 = Configuration.getPid(prefix + "." + PAR_TRASP_1);
-
-		listenerPid = Configuration.getPid(prefix + "." + PAR_LISTENER);
-		currentGroup = new WifiP2pGroup();
-		wifiP2pServiceList = new ArrayList<wifiP2pService>(); 
+		linkableId 				= Configuration.getPid(prefix + "." + PAR_PROTOCOL);
+		transportId5 			= Configuration.getPid(prefix + "." + PAR_TRASP_5);
+		transportId2 			= Configuration.getPid(prefix + "." + PAR_TRASP_2);
+		transportId1 			= Configuration.getPid(prefix + "." + PAR_TRASP_1);
+		listenerPid 			= Configuration.getPid(prefix + "." + PAR_LISTENER);
+		currentGroup 			= new WifiP2pGroup();
+		wifiP2pServiceList 		= new ArrayList<wifiP2pService>();
+		invitationTime			= 0;
+		invitedBy				= null;
+		EXTRA_WIFI_STATE		= 2;
+		returnState				= false;
+		groupOwner				= null;
+		thisNode				= Network.get(0);
+		pstatus					= AVAILABLE;
+		status					= AVAILABLE;
+		PservicediscoveryStarted= false;
+		PpeerDiscoveryStarted 	= false;
+		PwifiP2pEnabled			= true;
+		wifiP2pEnabled			= true;
+		peerDiscoveryStarted	= false;
+		serviceDiscoveryStarted = false;
+		
 	}
 
 	/* (non-Javadoc)
@@ -768,8 +777,22 @@ public class nodeP2pInfo implements Protocol{
 		npf.transportId1 = transportId1;
 		npf.linkableId = linkableId;
 		npf.listenerPid = listenerPid;
-		currentGroup = new WifiP2pGroup();
-		wifiP2pServiceList = new ArrayList<wifiP2pService>();
+		npf.currentGroup = new WifiP2pGroup();
+		npf.wifiP2pServiceList = new ArrayList<wifiP2pService>();
+		npf.invitationTime = 0;
+		npf.invitedBy = null;
+		npf.EXTRA_WIFI_STATE = 2;
+		npf.returnState = false;
+		npf.groupOwner = null;
+		npf.thisNode = Network.get(0);
+		npf.pstatus = AVAILABLE;
+		npf.status = AVAILABLE;
+		npf.PservicediscoveryStarted = false;
+		npf.PpeerDiscoveryStarted = false;
+		npf.PwifiP2pEnabled = true;
+		npf.wifiP2pEnabled = true;
+		npf.peerDiscoveryStarted = false;
+		npf.serviceDiscoveryStarted = false;		
 		return npf;	
 	}
 

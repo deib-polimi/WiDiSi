@@ -87,25 +87,25 @@ public class eventListeners implements EDProtocol {
 	////////////////////////////////////////////////////////////////
 
 	/** The Constant CONNECTED. */
-	private static final int CONNECTED   = 0;
+	public static final int CONNECTED   = 0;
 	
 	/** The Constant INVITED. */
-	private static final int INVITED     = 1;
+	public static final int INVITED     = 1;
 	
 	/** The Constant FAILED. */
-	private static final int FAILED      = 2;
+	public static final int FAILED      = 2;
 	
 	/** The Constant AVAILABLE. */
-	private static final int AVAILABLE   = 3;
+	public static final int AVAILABLE   = 3;
 	
 	/** The Constant UNAVAILABLE. */
-	private static final int UNAVAILABLE = 4;
+	public static final int UNAVAILABLE = 4;
 
 	/** The this node. */
-	private Node thisNode = Network.get(0); // initialize with an arbitrary node to prevent null return
+	private Node thisNode; 
 
 	/** The this pid. */
-	public int thisPid = 0;
+	public int thisPid;
 
 	/**
 	 * Instantiates a new event listeners.
@@ -123,6 +123,8 @@ public class eventListeners implements EDProtocol {
 		dnsListeners 		= new HashSet<DnsSdServiceResponseListener>();
 		txtListeners 		= new HashSet<DnsSdTxtRecordListener>();
 		broadcastReceivers 	= new HashSet<BroadcastReceiver>();
+		thisNode			= Network.get(0);	// initialize with an arbitrary node to prevent null return
+		thisPid				= 0;
 	}
 
 	/* (non-Javadoc)
@@ -249,12 +251,14 @@ public class eventListeners implements EDProtocol {
 		evl.linkableId = linkableId;
 		evl.p2pmanagerId = p2pmanagerId;
 		evl.p2pInfoPid = p2pInfoPid;
-		pListeners = new HashSet<PeerListListener>();
-		cListeners = new HashSet<ConnectionInfoListener>();
-		gListeners = new HashSet<GroupInfoListener>();
-		dnsListeners = new HashSet<DnsSdServiceResponseListener>();
-		txtListeners = new HashSet<DnsSdTxtRecordListener>();
-		broadcastReceivers = new HashSet<BroadcastReceiver>();
+		evl.pListeners = new HashSet<PeerListListener>();
+		evl.cListeners = new HashSet<ConnectionInfoListener>();
+		evl.gListeners = new HashSet<GroupInfoListener>();
+		evl.dnsListeners = new HashSet<DnsSdServiceResponseListener>();
+		evl.txtListeners = new HashSet<DnsSdTxtRecordListener>();
+		evl.broadcastReceivers = new HashSet<BroadcastReceiver>();
+		evl.thisNode	= Network.get(0);
+		evl.thisPid = 0;
 		return evl;	
 	}
 

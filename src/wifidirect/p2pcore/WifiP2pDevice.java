@@ -98,6 +98,7 @@ public class WifiP2pDevice {
     /** The node info. */
     private nodeP2pInfo nodeInfo;
 
+    private int thisPid;
     /**
      * Instantiates a new wifi p2p device.
      *
@@ -106,6 +107,7 @@ public class WifiP2pDevice {
      */
     public WifiP2pDevice(Node node, int p2pInfoPid) {
     	simulatorNode = node;
+    	thisPid = p2pInfoPid;
     	nodeInfo = (nodeP2pInfo) node.getProtocol(p2pInfoPid);
     	deviceAddress = nodeInfo.getMacAddress();
     	primaryDeviceType = "Mobile";
@@ -272,6 +274,7 @@ public class WifiP2pDevice {
      */
     public WifiP2pDevice(WifiP2pDevice source) {
         if (source != null) {
+        	nodeInfo = (nodeP2pInfo) source.simulatorNode.getProtocol(source.thisPid);
             deviceName = source.deviceName;
             deviceAddress = source.deviceAddress;
             primaryDeviceType = source.primaryDeviceType;

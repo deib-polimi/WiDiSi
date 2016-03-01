@@ -1,16 +1,15 @@
 ######################################################################################################
 ########### Simulation parameters ######################
 random.seed 		1234567890
-network.size 		200
+network.size 		100
 
 ######Simulation.endtime could be the number of cycles for controls
-simulation.endtime 	9000000
+simulation.endtime 	432000
 simulation.logtime 	100
-simulation.experiments 1
 
 #Network Dynamic
-MIN_NET_SIZE 		200
-MAX_NET_SIZE 		200
+MIN_NET_SIZE 		350
+MAX_NET_SIZE 		350
 NET_ADD_STEP 		1
 SIN_PERIOD 			10000
 NET_ADD_CYCLE_START 1
@@ -50,7 +49,7 @@ init.initnode nodeInitializer
 
 ########### CDScheduler on EDSimulator #################
 init.sch CDScheduler
-init.sch.protocol test1 proob wifimanager aodv
+init.sch.protocol test1 proob wifimanager
 init.sch.randstart
 
 ########### Ordering the initializer execution #########
@@ -59,32 +58,27 @@ order.init 		initnode, initcord, rnd, sch
 ######################################################################################################
 #############    CONTROLS    ###########################
 
-########### Routing Statistics #########################
-control.routestats statsCollector
-{
-	aodvroute 	aodv
-	step	  	1
-}
-
 ########### Network Visualizer #########################
 control.viz Visualizer
 {
+	transport 		utr1
 	p2pinfo 		nodinf
 	linkable 		lnk
+	p2pmanager 		p2pmanager
 	wifimanager  	wifimanager
 	coord 			intcord
 	step 			1
 }
 
 ########### Violation Checker #########################
-control.vioch ViolationChecker
-{
-	p2pinfo			nodinf
-	linkable		lnk
-	listeners		lst
-	p2pmanager		p2pmanager
-	step 			1
-}
+#control.vioch ViolationChecker
+#{
+#	p2pinfo			nodinf
+#	linkable		lnk
+#	listeners		lst
+#	p2pmanager		p2pmanager
+#	step 			1
+#}
 
 ########### Control Dynamism  ##########################
 control.dnet OscillatingNetwork
@@ -109,7 +103,7 @@ control.dnet OscillatingNetwork
 	
 	init.2		CDScheduler
 	{
-		protocol 		test1 proob wifimanager aodv
+		protocol 		test1 proob wifimanager
 		
 	}	
 }
@@ -121,12 +115,11 @@ control.move NodeMovement
 	p2pinfo 		nodinf
 	p2pmanager 		p2pmanager
 	coord 			intcord
-	wifimanager		wifimanager
 	step 			1
 }
 
 ########### Ordering the controls execution ############
-order.control 	dnet, move, viz, vioch, routestats
+order.control 	dnet, move, viz
 
 ######################################################################################################
 #############    CDPROTOCOLS    ########################
@@ -165,17 +158,6 @@ protocol.test1 WiFiServiceDiscoveryActivity
 	p2pmanager 		p2pmanager
 	p2pinfo 		nodinf
 	wifimanager		wifimanager
-	transport0      tr0
-	routaodv		aodv
-	step 			1
-}
-
-#AODV Routing
-protocol.aodv RouteAodv
-{
-	p2pmanager 		p2pmanager
-	p2pinfo 		nodinf
-	wifimanager		wifimanager
 	step 			1
 }
 ######################################################################################################
@@ -202,7 +184,6 @@ protocol.p2pmanager WifiP2pManager
 	transport5 		tr5
 	listeners 		lst
 	p2pinfo 		nodinf
-	wifimanager     wifimanager
 }
 
 
@@ -251,7 +232,7 @@ protocol.tr1 UniformRandomTransportModified
 {
 	delaytype		Device_Discovery_Delay
 	lowlayermodel	llmodel
-	error			0.01
+	error			0.1
 }
 protocol.utr1 UnreliableTransportModified
 {
@@ -264,7 +245,7 @@ protocol.tr2 UniformRandomTransportModified
 {
 	delaytype		Service_Discovery_Delay
 	lowlayermodel	llmodel
-	error			0.01
+	error			0.1
 }
 protocol.utr2 UnreliableTransportModified
 {
@@ -277,7 +258,7 @@ protocol.tr3 UniformRandomTransportModified
 {
 	delaytype		Message_Delivery_Delay
 	lowlayermodel	llmodel
-	error			0.01
+	error			0.1
 }
 protocol.utr3 UnreliableTransportModified
 {
@@ -290,7 +271,7 @@ protocol.tr4 UniformRandomTransportModified
 {
 	delaytype		Group_Invitation_Delay
 	lowlayermodel	llmodel
-	error			0.01
+	error			0.1
 }
 protocol.utr4 UnreliableTransportModified
 {
@@ -303,5 +284,5 @@ protocol.tr5 UniformRandomTransportModified
 {
 	delaytype		Internal_Processing_Delay
 	lowlayermodel	llmodel
-	error			0.01
+	error			0.1
 }

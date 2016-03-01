@@ -24,6 +24,7 @@ import peersim.config.Configuration;
 import peersim.core.Node;
 import peersim.core.Protocol;
 import wifidirect.nodemovement.CoordinateKeeper;
+import wifidirect.nodemovement.NodeMovement;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -33,9 +34,6 @@ public class LLModel implements LowLayerModel, Protocol{
 	
 	/** The coordinates pid. */
 	private int coordinatesPid;
-	
-	/** The cycle length. */
-	private long cycleLength;
 	
 	/** The Constant frequency. */
 	private static final double frequency = 2400; // in MHz -- Frequency
@@ -47,7 +45,7 @@ public class LLModel implements LowLayerModel, Protocol{
 	private static final double Grx = 5; // in dBi -- Gain RX antenna:
 	
 	/** The rate. */
-	private double rate = 0;
+	private double rate;
 	
 	/**
 	 * Instantiates a new LL model.
@@ -56,7 +54,7 @@ public class LLModel implements LowLayerModel, Protocol{
 	 */
 	public LLModel(String prefix) {
 		coordinatesPid 	 = Configuration.getPid(prefix + "." + "coordinate");
-		cycleLength 	 = Configuration.getLong(prefix + "." + "cycleLength");
+		rate = 0;
 	}
 
 	/* (non-Javadoc)
@@ -67,7 +65,7 @@ public class LLModel implements LowLayerModel, Protocol{
 		try { LLM = (LLModel) super.clone(); }
 		catch( CloneNotSupportedException e ) {} // never happens
 		LLM.coordinatesPid = coordinatesPid;
-		LLM.cycleLength = cycleLength;
+		LLM.rate = 0;
 		return LLM;	
 	}
 
@@ -134,7 +132,7 @@ public class LLModel implements LowLayerModel, Protocol{
 			// for now we just assume that the delay is constant
 			// It is open for furthur implementation in the future
 			long Channel = 400;  //milliseconds
-			return (long)(Channel/cycleLength);
+			return (long)(Channel/NodeMovement.CycleLenght);
 		}
 
 
@@ -143,8 +141,8 @@ public class LLModel implements LowLayerModel, Protocol{
 		 */
 		@Override
 		public long authenticationDelay(Node src, Node dest, Object object) {
-			long  Authentication= 500;  //milliseconds
-			return (long)(Authentication/cycleLength);
+			long  Authentication= 100;  //milliseconds
+			return (long)(Authentication/NodeMovement.CycleLenght);
 		}
 
 
@@ -153,8 +151,8 @@ public class LLModel implements LowLayerModel, Protocol{
 		 */
 		@Override
 		public long encryptiondelay(Node src, Node dest, Object object) {
-			long  Encryption= 300;  //milliseconds
-			return (long)(Encryption/cycleLength);
+			long  Encryption= 100;  //milliseconds
+			return (long)(Encryption/NodeMovement.CycleLenght);
 		}
 
 
@@ -163,8 +161,8 @@ public class LLModel implements LowLayerModel, Protocol{
 		 */
 		@Override
 		public long powerManagementDelay(Node src, Node dest, Object object) {
-			long  PManagement= 500;  //milliseconds
-			return (long)(PManagement/cycleLength);
+			long  PManagement= 100;  //milliseconds
+			return (long)(PManagement/NodeMovement.CycleLenght);
 		}
 
 
@@ -174,7 +172,7 @@ public class LLModel implements LowLayerModel, Protocol{
 		@Override
 		public long internalDelay(Node src, Node dest, Object object) {
 			long  Internal= 200;  //milliseconds
-			return (long)(Internal/cycleLength);
+			return (long)(Internal/NodeMovement.CycleLenght);
 		}
 
 
@@ -183,7 +181,7 @@ public class LLModel implements LowLayerModel, Protocol{
 		 */
 		@Override
 		public long switchingDelay(Node src, Node dest, Object object) {
-			long  Switching= 800;  //milliseconds
-			return (long)(Switching/cycleLength);
+			long  Switching= 500;  //milliseconds
+			return (long)(Switching/NodeMovement.CycleLenght);
 		}
 }

@@ -28,7 +28,7 @@ import peersim.core.Control;
 import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
-import wifidirect.nodemovement.Visualizer;
+import visualization.Visualizer;
 import wifidirect.p2pcore.WifiP2pManager.*;
 
 
@@ -112,7 +112,7 @@ public class ViolationChecker implements Control, PeerListListener, GroupInfoLis
 				listener.addGroupInfoListener(this);
 				listener.addConInfoListener(this);
 			}
-		}else{
+		}else if(cycle%10==0 && cycle>1){
 			for(int i=0; i<Network.size(); i++){
 				Linkable neighbor = (Linkable) Network.get(i).getProtocol(linkableId);
 				List<Node> neighborList = new ArrayList<Node>();
@@ -138,46 +138,48 @@ public class ViolationChecker implements Control, PeerListListener, GroupInfoLis
 							nodeP2pInfo cInfo = (nodeP2pInfo) cNode.getProtocol(p2pInfoPid);
 							if(cInfo.isGroupOwner() && !rule2NodeList.contains(cNode)){
 								rule2NodeList.add(cNode);
-								Visualizer.print("rules 2 violation. Node: " + cNode.getID() + " is still available at client List of Node: " + Network.get(i).getID());
-								Visualizer.rulesText2.setText(String.valueOf(Integer.parseInt(Visualizer.rulesText2.getText())+1));
+								//Visualizer.print("rules 2 violation. Node: " + cNode.getID() + " is still available at client List of Node: " + Network.get(i).getID());
+								Visualizer.mDwindow.ruleTwoCheck.setText(String.valueOf(Integer.parseInt(Visualizer.mDwindow.ruleTwoCheck.getText())+1));
 							}
 							
 							//rule 10
-							WifiP2pManager manager = (WifiP2pManager) cNode.getProtocol(p2pmanagerId);
-							for(Node cinNode: nodeInfo.currentGroup.getNodeList()){
-								if(cNode!=cinNode){
-									if(manager.send(null, String.valueOf(cinNode.getID())).equals("Message Sent!")){
-										Visualizer.rulesText10.setText(String.valueOf(Integer.parseInt(Visualizer.rulesText10.getText())+1));
-									}
-								}
-							}
+//							WifiP2pManager manager = (WifiP2pManager) cNode.getProtocol(p2pmanagerId);
+//							for(Node cinNode: nodeInfo.currentGroup.getNodeList()){
+//								if(cNode.getID()!=cinNode.getID() && cinNode.getID()!=Network.get(i).getID() && cNode.getID()!=Network.get(i).getID()){
+//									if(manager.send(null, String.valueOf(cinNode.getID())).equals("Message Sent!")){
+//										Visualizer.rulesText10.setText(String.valueOf(Integer.parseInt(Visualizer.rulesText10.getText())+1));
+//										Visualizer.print("Violation rule 10: A message sent from Node: " +  cNode.getID() + " to the Node: " + 
+//										cinNode.getID() + " and the group owner is: " + Network.get(i).getID());
+//									}
+//								}
+//							}
 						}
 						//rule 7
 						for(int k=0; k<Network.size(); k++){
 							if (k==i) continue;
 							nodeP2pInfo kInfo = (nodeP2pInfo) Network.get(k).getProtocol(p2pInfoPid);
 							if(kInfo.isGroupOwner() && kInfo.currentGroup.getNodeList().contains(Network.get(i)) && !rule7NodeList.contains(Network.get(k))){
-								Visualizer.rulesText7.setText(String.valueOf(Integer.parseInt(Visualizer.rulesText7.getText())+1));
+								Visualizer.mDwindow.ruleSevenCheck.setText(String.valueOf(Integer.parseInt(Visualizer.mDwindow.ruleSevenCheck.getText())+1));
 								rule7NodeList.add(Network.get(k));
 							}
 						}
 						
 						//rule 8
 						if(nodeInfo.currentGroup.getGroupSize()>WifiP2pGroup.groupCapacity){
-							Visualizer.rulesText8.setText(String.valueOf(Integer.parseInt(Visualizer.rulesText8.getText())+1));
+							Visualizer.mDwindow.ruleEightCheck.setText(String.valueOf(Integer.parseInt(Visualizer.mDwindow.ruleEightCheck.getText())+1));
 						}
 						
 					}else{
 
 						// rule 1
 						if(!neighborList.contains(nodeInfo.getGroupOwner())){
-							Visualizer.rulesText1.setText(String.valueOf(Integer.parseInt(Visualizer.rulesText1.getText())+1));
+							Visualizer.mDwindow.ruleOneCheck.setText(String.valueOf(Integer.parseInt(Visualizer.mDwindow.ruleOneCheck.getText())+1));
 						}	
 
-						//rule 3
+						//rule 3 This Node is a Client of another device which is not Group Owner
 						nodeP2pInfo gInfo = (nodeP2pInfo) nodeInfo.getGroupOwner().getProtocol(p2pInfoPid);
 						if(!gInfo.isGroupOwner()){
-							Visualizer.rulesText3.setText(String.valueOf(Integer.parseInt(Visualizer.rulesText3.getText())+1));
+							Visualizer.mDwindow.ruleThreeCheck.setText(String.valueOf(Integer.parseInt(Visualizer.mDwindow.ruleThreeCheck.getText())+1));
 						}
 					}
 				}
@@ -187,18 +189,18 @@ public class ViolationChecker implements Control, PeerListListener, GroupInfoLis
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#clone()
-	 */
-	public ViolationChecker clone(){
-		ViolationChecker vc = null;
-		try { vc = (ViolationChecker) super.clone(); }
-		catch( CloneNotSupportedException e ) {} // never happen
-		vc.p2pInfoPid = p2pInfoPid;
-		vc.linkableId = linkableId;
-		vc.listenerPid = listenerPid;
-		return vc;	
-	}
+//	/* (non-Javadoc)
+//	 * @see java.lang.Object#clone()
+//	 */
+//	public ViolationChecker clone(){
+//		ViolationChecker vc = null;
+//		try { vc = (ViolationChecker) super.clone(); }
+//		catch( CloneNotSupportedException e ) {} // never happen
+//		vc.p2pInfoPid = p2pInfoPid;
+//		vc.linkableId = linkableId;
+//		vc.listenerPid = listenerPid;
+//		return vc;	
+//	}
 
 	/* (non-Javadoc)
 	 * @see peersim.wifidirect.p2pcore.WifiP2pManager.PeerListListener#onPeersAvailable(peersim.wifidirect.p2pcore.WifiP2pDeviceList)
@@ -208,7 +210,7 @@ public class ViolationChecker implements Control, PeerListListener, GroupInfoLis
 		
 		// rule 4: 4.	A peer cannot see more than X number of devices and services
 		if(peers.getDeviceList().size()>nodeP2pInfo.maxNumDevices){
-			Visualizer.rulesText4.setText(String.valueOf(Integer.parseInt(Visualizer.rulesText4.getText())+1));
+			Visualizer.mDwindow.ruleFourCheck.setText(String.valueOf(Integer.parseInt(Visualizer.mDwindow.ruleFourCheck.getText())+1));
 		}
 		
 		//rule 6: 6.	A peer cannot discover other peers or services if they have not started peer discovery
@@ -227,7 +229,7 @@ public class ViolationChecker implements Control, PeerListListener, GroupInfoLis
 		for(Node peerNode: peerNodeList){
 			nodeP2pInfo peerInfo = (nodeP2pInfo) peerNode.getProtocol(p2pInfoPid);
 			if(!peerInfo.isPeerDiscoveryStarted()){
-				Visualizer.rulesText6.setText(String.valueOf(Integer.parseInt(Visualizer.rulesText6.getText())+1));
+				Visualizer.mDwindow.ruleSixCheck.setText(String.valueOf(Integer.parseInt(Visualizer.mDwindow.ruleSixCheck.getText())+1));
 			}
 		}
 		

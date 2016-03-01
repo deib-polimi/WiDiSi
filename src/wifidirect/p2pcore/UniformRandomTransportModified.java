@@ -78,9 +78,9 @@ private static final int Internal_Processing_Delay 	= 5;
  */
 public UniformRandomTransportModified(String prefix)
 {
-	error = Configuration.getDouble(prefix + "." + "error");
-	lowlayermodelPid = Configuration.getPid(prefix + "." + "lowlayermodel");
-	delayType = Configuration.getInt(prefix + "." + "delaytype");
+	error 				= Configuration.getDouble(prefix + "." + "error");
+	lowlayermodelPid 	= Configuration.getPid(prefix + "." + "lowlayermodel");
+	delayType 			= Configuration.getInt(prefix + "." + "delaytype");
 }
 
 //---------------------------------------------------------------------
@@ -144,8 +144,8 @@ public void send(Node src, Node dest, Object msg, int pid)
 		break;
 		
 	case Message_Delivery_Delay:
-		long mdDelay = 	llModel.channelDelay(src, dest, msg) + llModel.encryptiondelay(src, dest, msg) +
-						llModel.powerManagementDelay(src, dest, msg) + llModel.internalDelay(src, dest, msg);
+		long mdDelay = 	llModel.channelDelay(src, dest, msg) + llModel.encryptiondelay(src, dest, msg);
+						//llModel.powerManagementDelay(src, dest, msg) + llModel.internalDelay(src, dest, msg);
 		// now we apply the error rate of delay calculation here
 		delay = ((long)(mdDelay-error*mdDelay)+ CommonState.r.nextLong((long)(mdDelay+2*error*mdDelay)));
 		EDSimulator.add(delay, msg, dest, pid);

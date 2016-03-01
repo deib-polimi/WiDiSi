@@ -20,6 +20,7 @@
  */
 package wifidirect.p2pcore;
 
+import applications.magnet.Routing.MacAddress;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -61,6 +62,11 @@ public class callbackMessage {
      */
     public Object obj;
 
+    /**
+     * additional filed that I addedto this class -- this is the last hop mac address
+     * Naser
+     */
+    public MacAddress lastHopMacAddr;
     /**
      * Instantiates a new callback message.
      */

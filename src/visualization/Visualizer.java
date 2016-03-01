@@ -16,9 +16,9 @@
  * 
  * Author: Naser Derakhshan
  * Politecnico di Milano
- *
+ * Condition: Do not remove this head
  */
-package wifidirect.nodemovement;
+package visualization;
 
 import it.uniroma1.dis.wsngroup.gexf4j.core.EdgeType;
 import it.uniroma1.dis.wsngroup.gexf4j.core.Gexf;
@@ -36,10 +36,7 @@ import it.uniroma1.dis.wsngroup.gexf4j.core.impl.viz.PositionImpl;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -61,13 +58,9 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 import javax.swing.border.EmptyBorder;
 
@@ -99,6 +92,9 @@ import peersim.core.Linkable;
 import peersim.core.Network;
 import peersim.core.Node;
 import wifi.WifiManager;
+import wifidirect.nodemovement.CoordinateKeeper;
+import wifidirect.nodemovement.NodeMovement;
+import wifidirect.p2pcore.WifiP2pGroup;
 import wifidirect.p2pcore.nodeP2pInfo;
 
 // TODO: Auto-generated Javadoc
@@ -107,6 +103,8 @@ import wifidirect.p2pcore.nodeP2pInfo;
  */
 public class Visualizer implements Control{
 
+	public static List<it.uniroma1.dis.wsngroup.gexf4j.core.Node> gephiNodeGroup;
+	public static ColorImpl[] pNodeColor = new ColorImpl[1000];
 	/** The Constant CONNECTED. */
 	public static final int CONNECTED   = 0;
 
@@ -122,47 +120,11 @@ public class Visualizer implements Control{
 	/** The Constant UNAVAILABLE. */
 	public static final int UNAVAILABLE = 4;
 
-	/** The Constant PAR_MANAGE. */
-	private static final String PAR_MANAGE = "p2pmanager";
-
-	/** The Constant PAR_LINKABLE. */
-	private static final String PAR_LINKABLE = "linkable";
-
-	/** The Constant PAR_P2PINFO. */
-	private static final String PAR_P2PINFO = "p2pinfo";
-
-	/** The Constant PAR_TRASP. */
-	private static final String PAR_TRASP = "transport";
-
-	/** The Constant PAR_CYCLE. */
-	private static final String PAR_CYCLE = "cyclelen";
-
-	/** The Constant PAR_FIELD. */
-	private static final String PAR_FIELD = "fieldlen";
-
-	/** The Constant PAR_GEPHI. */
-	private static final String PAR_GEPHI = "gephisize";
-
-	/** The Constant PAR_MAXSPEED. */
-	private static final String PAR_MAXSPEED = "maxspeed";
-
-	/** The Constant PAR_MINSPEED. */
-	private static final String PAR_MINSPEED = "minspeed";
-
-	/** The Constant PAR_SHOW_GROUPS. */
-	private static final String PAR_SHOW_GROUPS = "showgroups";
-
 	/** The coordinates pid. */
 	private int coordinatesPid;
 
-	/** The transport id. */
-	private int transportId;
-
 	/** The linkable id. */
 	private int linkableId;
-
-	/** The p2pmanager id. */
-	private int p2pmanagerId;
 
 	private int wifimanagerPid;
 
@@ -170,7 +132,7 @@ public class Visualizer implements Control{
 	private int p2pInfoPid;
 
 	/** The Cycle length. */
-	private int CycleLength;
+	public static int CycleLength = 100;
 
 	/** The Field length. */
 	private int FieldLength;
@@ -185,56 +147,47 @@ public class Visualizer implements Control{
 	private double minspeed;
 
 	/** The showgroups. */
-	private boolean showgroups;
+	public static boolean showgroups = true;
 
 	/** The show netwok image. */
-	private 			boolean 				showNetwokImage	= false;
+	private static  boolean 	showNetwokImage	= false;
 
 	/** The start time real. */
-	private 			long 					startTimeReal 	= 0;
+	private long 		startTimeReal = 0;
 
 	/** The cycle. */
-	private 			long 					cycle 			= 0;
-
+	private long 		cycle 	= 0;
 
 	/** The frame. */
-	private 			JFrame 					frame 			= null;
+	private JFrame 		frame 	= null;
 
 	/** The frame2. */
-	private 			JFrame 					frame2 			= null;
+	private static JFrame 		frame2 	= null;
 
 	/** The node. */
-	private 			Node 					node 			= null;
+	private Node 		node 	= null;
 
 	/** The image. */
-	private				Image 					image			= null;
+	private	Image 		image	= null;
 
 	/** The image2. */
-	private				Image 					image2			= null;
+	private	Image 		image2	= null;
 
 	/** The label. */
-	private				JLabel 					label			= null;
+	private	JLabel 		label	= null;
 
 	/** The label2. */
-	private				JLabel 					label2			= null;
+	private	JLabel 		label2	= null;
 
 	/** The output. */
-	private static		JTextArea 				output			= null;
+	private static	JTextArea 	output	= null;
 
 	/** The content pane. */
-	private 			JPanel 					contentPane		= null;
-
-	/** The text field13. */
-	public static JTextField textField1, textField2, textField3, textField4, textField5, textField6, textField7, textField8, textField9, textField10, textField11, textField12, textField13;;
-
-	/** The label field13. */
-	private static JLabel labelField1, labelField2, labelField3, labelField4, labelField5, labelField6, labelField7, labelField8, labelField9, labelField10, labelField11, labelField12, labelField13;
-
-	/** The rules text15. */
-	public static JTextField rulesText1, rulesText2, rulesText3, rulesText4, rulesText5, rulesText6, rulesText7, rulesText8,
-	rulesText9, rulesText10, rulesText11, rulesText12, rulesText13, rulesText14, rulesText15;
+	private JPanel 		contentPane	= null;
 
 	private static boolean scrollOutput = true;
+
+	public static MainDebug mDwindow;
 
 	/**
 	 * Instantiates a new visualizer.
@@ -242,17 +195,10 @@ public class Visualizer implements Control{
 	 * @param prefix the prefix
 	 */
 	public Visualizer(String prefix){
-		transportId 	= Configuration.getPid(prefix + "." + PAR_TRASP);
-		p2pInfoPid 		= Configuration.getPid(prefix + "." + PAR_P2PINFO);
-		linkableId 		= Configuration.getPid(prefix + "." + PAR_LINKABLE);
-		p2pmanagerId 	= Configuration.getPid(prefix + "." + PAR_MANAGE);
+		p2pInfoPid 		= Configuration.getPid(prefix + "." + "p2pinfo");
+		linkableId 		= Configuration.getPid(prefix + "." + "linkable");
 		wifimanagerPid 	= Configuration.getPid(prefix + "." + "wifimanager");
-		CycleLength		= Configuration.getInt(prefix + "." + PAR_CYCLE);
-		FieldLength		= Configuration.getInt(prefix + "." + PAR_FIELD);
-		GephiSize		= Configuration.getInt(prefix + "." + PAR_GEPHI);
-		maxspeed		= Configuration.getDouble(prefix + "." + PAR_MAXSPEED);
-		minspeed		= Configuration.getDouble(prefix + "." + PAR_MINSPEED);
-		showgroups		= (Configuration.getInt(prefix + "." + PAR_SHOW_GROUPS)>0)? true:false;
+		coordinatesPid  = Configuration.getPid(prefix + "." + "coord");
 	}
 
 	/* (non-Javadoc)
@@ -262,40 +208,57 @@ public class Visualizer implements Control{
 	public boolean execute() {
 		//System.out.println("Cycle: " + cycle + " time: " + CommonState.getTime() + " phase: " + CommonState.getPhase() + " int time: " + CommonState.getIntTime());
 
+		CycleLength = (int)NodeMovement.CycleLenght;
+		FieldLength = (int)NodeMovement.FieldLength;
+		GephiSize	= (int)(NodeMovement.FieldLength/20);
+		maxspeed 	= NodeMovement.SpeedMx; // meter/sec
+		minspeed	= NodeMovement.SpeedMn; // meter/sec
+
+
 		if(cycle%5==0 && showgroups){
 			showGroups();
 		}
-		if(showNetwokImage){
+		if(cycle%5==0 && isShowNetwokImage()){
 			showNetwork();
 		}
 
-		// add cyclye in each round
-		//if(cycle%10==0)	print(cycle);
+		if(cycle==0){
 
-		if(cycle==1){
-			showFields();
-			rulesViolationCheck();
+			mDwindow = new MainDebug();
+			mDwindow.frame.setVisible(true);
+			mDwindow.frame.setAlwaysOnTop(true);
 
-			labelField1.setText("Real Time(S): ");
-			labelField2.setText("Simulator Time(S): ");			
-			labelField3.setText("Max Speed(m/s): ");
-			textField3.setText(String.valueOf(maxspeed));
-			labelField4.setText("Min Speed(m/s): ");
-			textField4.setText(String.valueOf(minspeed));
-			labelField5.setText("Network Size: ");
-			labelField6.setText("No. Groups: ");
-			labelField7.setText("No. Connected Peers: ");
-			labelField8.setText("Max No. Clients: ");
-			labelField9.setText("Max No. Neighbors: ");
-			labelField10.setText("No. invitation timeout: ");
-			textField10.setText(String.valueOf(0));
-			labelField11.setText("Cycle: ");
-			labelField12.setText("Standard Deviation: ");
-			labelField13.setText("Mean Value: ");
+			mDwindow.timeOutInfo.setText(String.valueOf(0));
+			mDwindow.ruleOneCheck.setText(String.valueOf(0));
+			mDwindow.ruleTwoCheck.setText(String.valueOf(0));
+			mDwindow.ruleThreeCheck.setText(String.valueOf(0));
+			mDwindow.ruleFourCheck.setText(String.valueOf(0));
+			mDwindow.ruleFiveCheck.setText(String.valueOf(0));
+			mDwindow.ruleSixCheck.setText(String.valueOf(0));
+			mDwindow.ruleSevenCheck.setText(String.valueOf(0));
+			mDwindow.ruleEightCheck.setText(String.valueOf(0));
+			mDwindow.ruleNineCheck.setText(String.valueOf(0));
+			mDwindow.ruleTenCheck.setText(String.valueOf(0));
+			mDwindow.ruleElevenCheck.setText(String.valueOf(0));
+			mDwindow.ruleTwelveCheck.setText(String.valueOf(0));			
+			mDwindow.cycleLengthControl.setText(String.valueOf(NodeMovement.CycleLenght));
+			mDwindow.fieldLengthControl.setText(String.valueOf(NodeMovement.FieldLength));
+			mDwindow.radioRangeControl.setText(String.valueOf(NodeMovement.radio));
+			mDwindow.maxSpeedControl.setText(String.valueOf(NodeMovement.SpeedMx));
+			mDwindow.minSpeedControl.setText(String.valueOf(NodeMovement.SpeedMn));
+			mDwindow.maxClientControl.setText(String.valueOf(WifiP2pGroup.groupCapacity));
+			mDwindow.vizNetBut.setSelected(Visualizer.showgroups);
+			mDwindow.vizProxyBut.setSelected(false);
+			mDwindow.pauseSimBut.setSelected(false);
+
+			pNodeColor = new ColorImpl[1000];
 			startTimeReal = System.currentTimeMillis();	
 		}
 
-		if(cycle>1){		
+		if(cycle>1){
+			mDwindow.maxNodeSpeed.setText(String.valueOf(maxspeed));
+			mDwindow.minNodeSpeed.setText(String.valueOf(minspeed));
+
 			long connectedDevices = 0;
 			long noGroups = 0;
 			int maxClient = 0;
@@ -326,7 +289,7 @@ public class Visualizer implements Control{
 			long remain = elapsedSeconds%3600;
 			int min = (int) remain/60;
 			int sec = (int) remain%60;
-			textField1.setText(String.valueOf(hour + ":" + min + ":" + sec));
+			mDwindow.realTime.setText(String.valueOf(hour + ":" + min + ":" + sec));
 
 			//calculate the simulator time
 			elapsedTime = (CycleLength * CommonState.getTime());
@@ -335,14 +298,16 @@ public class Visualizer implements Control{
 			remain = elapsedSeconds%3600;
 			min = (int) remain/60;
 			sec = (int) remain%60;
-			textField2.setText(String.valueOf(hour + ":" + min + ":" + sec));
+			mDwindow.simTime.setText(String.valueOf(hour + ":" + min + ":" + sec));
 
-			textField5.setText(String.valueOf(Network.size()));
-			textField6.setText(String.valueOf(noGroups));
-			textField7.setText(String.valueOf(connectedDevices));
-			textField8.setText(String.valueOf(maxClient));
-			textField9.setText(String.valueOf(maxNeighbor));
-			textField11.setText(String.valueOf(CommonState.getTime()));		
+			mDwindow.netSize.setText(String.valueOf(Network.size()));
+			mDwindow.numGroups.setText(String.valueOf(noGroups));
+			mDwindow.numConnectedNodes.setText(String.valueOf(connectedDevices));
+			mDwindow.numclients.setText(String.valueOf(maxClient));
+			mDwindow.maxNeighbor.setText(String.valueOf(maxNeighbor));
+			mDwindow.curCycle.setText(String.valueOf(CommonState.getTime()));	
+			mDwindow.cycleLengthInfo.setText(String.valueOf(CycleLength));
+
 		}
 
 		cycle++;
@@ -424,15 +389,13 @@ public class Visualizer implements Control{
 
 				showNet.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent actionEvent) {
-						showNetwokImage = true;
-						frame2.setVisible(true);
+						setShowNetwokImage(true);
 					}
 				});
 
 				hideNet.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent actionEvent) {
-						showNetwokImage = false;
-						frame2.setVisible(false);
+						setShowNetwokImage(false);					
 					}
 				});
 
@@ -467,23 +430,15 @@ public class Visualizer implements Control{
 		}
 	}
 
-	//	public Visualizer clone(){
-	//		Visualizer tf = null;
-	//		try { tf = (Visualizer) super.clone(); }
-	//		catch( CloneNotSupportedException e ) {} // never happen
-	//		tf.newappId = newappId;
-	//		tf.transportId = transportId;
-	//		tf.p2pInfoPid = p2pInfoPid;
-	//		tf.linkableId = linkableId;
-	//		tf.p2pmanagerId = p2pmanagerId;
-	//		tf.applicationId = applicationId;
-	//		tf.CycleLength = CycleLength;
-	//		tf.FieldLength = FieldLength;
-	//		tf.GephiSize = GephiSize;
-	//		tf.maxspeed = maxspeed;
-	//		tf.minspeed = minspeed;
-	//		return tf;	
-	//	}
+	public static boolean isShowNetwokImage() {
+		return showNetwokImage;
+	}
+
+	public static void setShowNetwokImage(boolean showNetwokImage) {
+		Visualizer.showNetwokImage = showNetwokImage;
+		if(frame2!=null)
+			frame2.setVisible(showNetwokImage);
+	}
 
 	/**
 	 * Show network.
@@ -748,7 +703,7 @@ public class Visualizer implements Control{
 
 		// This Graph class is taken from gexf library
 		Graph graph = gexf.getGraph();
-		graph.setDefaultEdgeType(EdgeType.UNDIRECTED).setMode(Mode.STATIC);
+		graph.setDefaultEdgeType(EdgeType.UNDIRECTED).setMode(Mode.DYNAMIC);
 
 		// attribute is needed so that the gephi importer find the necessary feilds for long-lat
 		AttributeList attrList = new AttributeListImpl(AttributeClass.NODE);
@@ -757,7 +712,7 @@ public class Visualizer implements Control{
 		Attribute latitude = attrList.createAttribute("latitude", AttributeType.FLOAT, "latitude");
 
 		// A list of Ghefi nodes - We used long identifier to distinguish gephi Node from peerSim Node
-		List<it.uniroma1.dis.wsngroup.gexf4j.core.Node> gephiNode = new ArrayList<it.uniroma1.dis.wsngroup.gexf4j.core.Node>();	
+		gephiNodeGroup = new ArrayList<it.uniroma1.dis.wsngroup.gexf4j.core.Node>();	
 		// A HashMap that map peersim nodeID to the gephi node
 		HashMap<Long, it.uniroma1.dis.wsngroup.gexf4j.core.Node> gephiMap = new HashMap<Long, it.uniroma1.dis.wsngroup.gexf4j.core.Node>();
 
@@ -768,35 +723,43 @@ public class Visualizer implements Control{
 			WifiManager wifiManager = (WifiManager) node.getProtocol(wifimanagerPid);
 			CoordinateKeeper coordinate = (CoordinateKeeper) node.getProtocol(coordinatesPid);
 			PositionImpl nodePosition = new PositionImpl();
-			ColorImpl nodeColor = new ColorImpl();
-			if(nodeInfo.isGroupOwner() && nodeInfo.getStatus()==CONNECTED){
-				nodeColor.setB(0);
-				nodeColor.setG(255);
-				nodeColor.setR(0);
-			}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()==CONNECTED){
-				nodeColor.setB(255);
-				nodeColor.setG(0);
-				nodeColor.setR(255);	
-			}else if(!nodeInfo.isGroupOwner() && nodeInfo.getStatus()==CONNECTED){
-				nodeColor.setB(255);
-				nodeColor.setG(0);
-				nodeColor.setR(0);	
-			}else if(nodeInfo.getStatus()==AVAILABLE && nodeInfo.isPeerDiscoveryStarted()){
-				nodeColor.setB(150);
-				nodeColor.setG(150);
-				nodeColor.setR(150);
-			}else if(nodeInfo.getStatus()==INVITED && nodeInfo.isPeerDiscoveryStarted()){
-				nodeColor.setB(255);
-				nodeColor.setG(255);
-				nodeColor.setR(0);
-			}else if(!nodeInfo.isPeerDiscoveryStarted()){
-				nodeColor.setB(0);
-				nodeColor.setG(0);
-				nodeColor.setR(255);	
-			}else if((nodeInfo.getStatus()==UNAVAILABLE)){
-				nodeColor.setB(255);
-				nodeColor.setG(255);
-				nodeColor.setR(255);
+			if(cycle == 5 || cycle%20==0){
+				ColorImpl nodeColor = new ColorImpl();
+				if(nodeInfo.isGroupOwner() && nodeInfo.getStatus()==CONNECTED){
+					nodeColor.setB(0);
+					nodeColor.setG(255);
+					nodeColor.setR(0);
+				}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()==CONNECTED &&  nodeInfo.getStatus()==CONNECTED){
+					nodeColor.setB(255);
+					nodeColor.setG(0);
+					nodeColor.setR(255);	
+				}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()!=CONNECTED && nodeInfo.getStatus()==CONNECTED){
+					nodeColor.setB(254);
+					nodeColor.setG(0);
+					nodeColor.setR(0);	
+				}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()==CONNECTED && nodeInfo.getStatus()!=CONNECTED){
+					nodeColor.setB(180);
+					nodeColor.setG(180);
+					nodeColor.setR(60);	
+				}else if(nodeInfo.getStatus()==AVAILABLE && nodeInfo.isPeerDiscoveryStarted()){
+					nodeColor.setB(150);
+					nodeColor.setG(150);
+					nodeColor.setR(150);
+				}else if(nodeInfo.getStatus()==INVITED && nodeInfo.isPeerDiscoveryStarted()){
+					nodeColor.setB(255);
+					nodeColor.setG(255);
+					nodeColor.setR(0);
+				}else if(!nodeInfo.isPeerDiscoveryStarted()){
+					nodeColor.setB(100);
+					nodeColor.setG(100);
+					nodeColor.setR(100);	
+				}else if((nodeInfo.getStatus()==UNAVAILABLE)){
+					nodeColor.setB(255);
+					nodeColor.setG(255);
+					nodeColor.setR(255);
+				}
+
+				pNodeColor[i] = nodeColor;
 			}
 			float signx, signy;
 			if((float)coordinate.getX()<0){
@@ -809,20 +772,20 @@ public class Visualizer implements Control{
 			}else{
 				signy = 1;
 			}
-			// here I check the coordinates to be sure the coordinates is not larger than 100 or -100 (double check)
+			// here I check the coordinates to be sure the coordinates is not larger than 1000 or -1000 (double check)
 			nodePosition.setX(Math.abs((float)coordinate.getX()*FieldLength)> FieldLength ? signx*FieldLength:((float)coordinate.getX()*FieldLength));
 			nodePosition.setY(Math.abs((float)coordinate.getY()*FieldLength)> FieldLength ? signy*FieldLength:((float)coordinate.getY()*FieldLength));
 			nodePosition.setZ(0);
-			gephiNode.add(i, graph.createNode(String.valueOf(node.getID())));
-			gephiNode.get(i)
+			gephiNodeGroup.add(i, graph.createNode(String.valueOf(node.getID())));
+			gephiNodeGroup.get(i)
 			.setLabel(String.valueOf(node.getID()))
 			.setSize(GephiSize)
 			.setPosition(nodePosition)
-			.setColor(nodeColor)
+			.setColor(pNodeColor[i])
 			.getAttributeValues()
 			.addValue(longitude, String.valueOf(nodePosition.getX()))
 			.addValue(latitude, String.valueOf(nodePosition.getY()));
-			gephiMap.put(node.getID(), gephiNode.get(i));
+			gephiMap.put(node.getID(), gephiNodeGroup.get(i));
 		}
 
 		// This section creates 4 dump gephi nodes at the 4 end of cartesian system in order to see the movement
@@ -852,8 +815,8 @@ public class Visualizer implements Control{
 				nodePosition.setZ(0);
 			}
 
-			gephiNode.add(Network.size()+i, graph.createNode(String.valueOf((i+1)*1000)));
-			gephiNode.get(Network.size()+i)
+			gephiNodeGroup.add(Network.size()+i, graph.createNode(String.valueOf((i+1)*1000)));
+			gephiNodeGroup.get(Network.size()+i)
 			.setLabel(String.valueOf((i+1)*1000))
 			.setSize(GephiSize)
 			.setPosition(nodePosition)
@@ -861,15 +824,8 @@ public class Visualizer implements Control{
 			.getAttributeValues()
 			.addValue(longitude, String.valueOf(nodePosition.getX()))
 			.addValue(latitude, String.valueOf(nodePosition.getY()));
-			gephiMap.put((long) ((i+1)*1000), gephiNode.get(i));
+			gephiMap.put((long) ((i+1)*1000), gephiNodeGroup.get(i));
 		}
-
-		//		try{
-		//			writer = new PrintWriter(new BufferedWriter(new FileWriter("log/nodeInfoObs.txt", true)));
-		//		} catch (IOException e) {
-		//		    System.out.println("File nodeInfoObs.txt not found");
-		//		}
-
 
 		// create the gephi layer by setting the neighbors
 		for(int i=0; i<Network.size(); i++){
@@ -887,16 +843,16 @@ public class Visualizer implements Control{
 				// this node is group owner and connected to the second node via wifi p2p interface
 				if(nodeInfo.getStatus()==CONNECTED && nodeInfo.isGroupOwner() && 
 						nodeInfo.currentGroup.getNodeList().contains(idlelink.getNeighbor(j)) && neighborInfo.getGroupOwner()==node){
-					gephiNode.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(j).getID()));
+					gephiNodeGroup.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(j).getID()));
 
 					// this node is not group owner and the second node is group owner for this node
 				}else if(!nodeInfo.isGroupOwner() && nodeInfo.getStatus()==CONNECTED && 
 						nodeInfo.getGroupOwner()==idlelink.getNeighbor(j) && 
 						neighborInfo.currentGroup.getNodeList().contains(node) && neighborInfo.isGroupOwner()){
-					gephiNode.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(j).getID()));
+					gephiNodeGroup.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(j).getID()));
 				}
 			}
-			
+
 			// check again for wifi interface as well
 			for(int k=0; k<idlelink.degree(); k++){	
 
@@ -909,35 +865,35 @@ public class Visualizer implements Control{
 						nodeInfo.currentGroup.getNodeList().contains(idlelink.getNeighbor(k)) && 
 						neighborWifiManager.getWifiStatus()==CONNECTED && 
 						neighborWifiManager.apSSID.equals(nodeInfo.currentGroup.getSSID())){
-						
-					if(!gephiNode.get(i).hasEdgeTo(gephiMap.get(idlelink.getNeighbor(k).getID()).getId())){
-						gephiNode.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(k).getID()));
+
+					if(!gephiNodeGroup.get(i).hasEdgeTo(gephiMap.get(idlelink.getNeighbor(k).getID()).getId())){
+						gephiNodeGroup.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(k).getID()));
 					}
 
 					// this node (client or group owner) is connected via WiFi Interface to a Group Owner	
 				}else if(wifiManager.getWifiStatus() == CONNECTED && wifiManager.apSSID.equals(neighborInfo.currentGroup.getSSID())
 						&& neighborInfo.isGroupOwner() && neighborInfo.currentGroup.getNodeList().contains(node)){	
-					
-					if(!gephiNode.get(i).hasEdgeTo(gephiMap.get(idlelink.getNeighbor(k).getID()).getId())){
-						gephiNode.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(k).getID()));
+
+					if(!gephiNodeGroup.get(i).hasEdgeTo(gephiMap.get(idlelink.getNeighbor(k).getID()).getId())){
+						gephiNodeGroup.get(i).connectTo(gephiMap.get(idlelink.getNeighbor(k).getID()));
 					}
 				}
 			}
 		}
-		for(int i=0; i<Network.size(); i++){
-			node = (Node) Network.get(i);
-			nodeP2pInfo nodeInfo = (nodeP2pInfo) node.getProtocol(p2pInfoPid);
-			if(nodeInfo.getStatus()==CONNECTED && !nodeInfo.isGroupOwner() && gephiNode.get(i).getEdges().isEmpty()){
-				print("Node: " + node.getID() + " GO: " + nodeInfo.getGroupOwner().getID());
-				nodeP2pInfo neighborInfo = (nodeP2pInfo) nodeInfo.getGroupOwner().getProtocol(p2pInfoPid);
-				print(neighborInfo.currentGroup.getNodeList().contains(node));
-				print("Nodes inside this Group: ");
-				for(Node tempNode: neighborInfo.currentGroup.getNodeList()){
-					print(tempNode.getID());
-
-				}
-			}
-		}
+//		for(int i=0; i<Network.size(); i++){
+//			node = (Node) Network.get(i);
+//			nodeP2pInfo nodeInfo = (nodeP2pInfo) node.getProtocol(p2pInfoPid);
+//			if(nodeInfo.getStatus()==CONNECTED && !nodeInfo.isGroupOwner() && gephiNodeGroup.get(i).getEdges().isEmpty()){
+//				print("Node: " + node.getID() + " GO: " + nodeInfo.getGroupOwner().getID());
+//				nodeP2pInfo neighborInfo = (nodeP2pInfo) nodeInfo.getGroupOwner().getProtocol(p2pInfoPid);
+//				print(neighborInfo.currentGroup.getNodeList().contains(node));
+//				print("Nodes inside this Group: ");
+//				for(Node tempNode: neighborInfo.currentGroup.getNodeList()){
+//					print(tempNode.getID());
+//
+//				}
+//			}
+//		}
 
 		// generate output gexf file from the above mentioned graph
 		StaxGraphWriter graphWriter = new StaxGraphWriter();			
@@ -953,20 +909,6 @@ public class Visualizer implements Control{
 			e1.printStackTrace();
 		}
 
-		//							File gexfFile = new File("log/gexfNetwork.gexf");
-		//							
-		//							try {
-		//								Writer out1 =  new FileWriter(gexfFile, false);
-		//								graphWriter.writeToStream(gexf, out1, "UTF-8");
-		//							} catch (IOException e) {
-		//								// TODO Auto-generated catch block
-		//								e.printStackTrace();
-		//							}
-		//				System.out.println(outputStream.size());
-		//				buffer = outputStream.toByteArray();
-		//				System.out.println(buffer.length);
-		//				inStream = new ByteArrayInputStream(buffer);
-
 		// Import the created graph.gexf file to the gephi library
 		//Init a project - and therefore a workspace
 		ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
@@ -979,10 +921,6 @@ public class Visualizer implements Control{
 		//Import file
 		Container container = null;
 		try{	
-
-			//				File myGraph = new File("E:\\Polimi\\adt-bundle-windows-x86_64-20140702\\PeerSimSource\\log\\gexfNetwork.gexf");
-			//				container = importController.importFile(myGraph);
-
 			container = importController.importFile(tempFile);
 			container.getLoader().setEdgeDefault(EdgeDefault.UNDIRECTED); //Force DIRECTED
 			container.setAllowAutoNode(false); //Don’t create missing nodes
@@ -1013,7 +951,7 @@ public class Visualizer implements Control{
 		model.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
 		model.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.TRUE);
 		model.getProperties().putValue(PreviewProperty.EDGE_COLOR, new EdgeColor(Color.BLACK));
-		model.getProperties().putValue(PreviewProperty.EDGE_THICKNESS, new Float(0.1f));
+		model.getProperties().putValue(PreviewProperty.EDGE_THICKNESS, new Float(3.9f));
 		model.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
 		model.getProperties().putValue(PreviewProperty.EDGE_OPACITY, new Float(100));
 		//model.getProperties().putValue(PreviewProperty.NODE_BORDER_WIDTH, new Float(18));
@@ -1051,288 +989,16 @@ public class Visualizer implements Control{
 	 *
 	 * @param ob the ob
 	 */
-	public static void print(Object ob) {
+	public static void print(Object ob, Color color) {
 		if(output!=null){
+			//output.setCaretColor(color);
+			
 			output.append("\n" + ob);
+			output.setForeground(color);
+			
 			if (scrollOutput){
 				output.setCaretPosition(output.getDocument().getLength());
 			}
 		}
 	}
-
-	/**
-	 * Show fields.
-	 */
-	public void showFields(){
-
-		JFrame frameField = new JFrame("Fileds");
-		java.awt.Container content = frameField.getContentPane();
-		content.setLayout(new GridBagLayout());
-		content.setBackground(UIManager.getColor("control"));
-		GridBagConstraints c = new GridBagConstraints();
-
-		c.gridx = 0;
-		c.gridy = GridBagConstraints.RELATIVE;
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.insets = new Insets(2, 2, 2, 2);
-		c.anchor = GridBagConstraints.EAST;
-
-		//JPanel Field1 = new JPanel(new BorderLayout());
-		labelField1 = new JLabel("Label 1", SwingConstants.RIGHT);
-		labelField2 = new JLabel("Label 2", SwingConstants.RIGHT);
-		labelField3 = new JLabel("Label 3", SwingConstants.RIGHT);
-		labelField4 = new JLabel("Label 4", SwingConstants.RIGHT);
-		labelField5 = new JLabel("Label 5", SwingConstants.RIGHT);
-		labelField6 = new JLabel("Label 6", SwingConstants.RIGHT);
-		labelField7 = new JLabel("Label 7", SwingConstants.RIGHT);
-		labelField8 = new JLabel("Label 8", SwingConstants.RIGHT);
-		labelField9 = new JLabel("Label 9", SwingConstants.RIGHT);
-		labelField10 = new JLabel("Label 10", SwingConstants.RIGHT);
-		labelField11 = new JLabel("Label 11", SwingConstants.RIGHT);
-		labelField12 = new JLabel("Label 12", SwingConstants.RIGHT);
-		labelField13 = new JLabel("Label 13", SwingConstants.RIGHT);
-
-		content.add(labelField1, c);
-		labelField1.setDisplayedMnemonic('1');
-		content.add(labelField2, c);
-		labelField2.setDisplayedMnemonic('2');
-		content.add(labelField3, c);
-		labelField3.setDisplayedMnemonic('3');
-		content.add(labelField4, c);
-		labelField4.setDisplayedMnemonic('4');
-		content.add(labelField5, c);
-		labelField5.setDisplayedMnemonic('5');
-		content.add(labelField6, c);
-		labelField6.setDisplayedMnemonic('6');
-		content.add(labelField7, c);
-		labelField7.setDisplayedMnemonic('7');
-		content.add(labelField8, c);
-		labelField8.setDisplayedMnemonic('8');
-		content.add(labelField9, c);
-		labelField9.setDisplayedMnemonic('9');
-		content.add(labelField10, c);
-		labelField10.setDisplayedMnemonic('A');
-		content.add(labelField11, c);
-		labelField11.setDisplayedMnemonic('B');
-		content.add(labelField12, c);
-		labelField12.setDisplayedMnemonic('C');
-		content.add(labelField13, c);
-		labelField13.setDisplayedMnemonic('D');
-
-		c.gridx = 1;
-		c.gridy = 0;
-		c.weightx = 1.0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.CENTER;
-
-		textField1 = new JTextField(15);
-		textField2 = new JTextField(15);
-		textField3 = new JTextField(15);
-		textField4 = new JTextField(15);
-		textField5 = new JTextField(15);
-		textField6 = new JTextField(15);
-		textField7 = new JTextField(15);
-		textField8 = new JTextField(15);
-		textField9 = new JTextField(15);
-		textField10 = new JTextField(15);
-		textField11 = new JTextField(15);
-		textField12 = new JTextField(15);
-		textField13 = new JTextField(15);
-
-		content.add(textField1, c);
-		textField1.setFocusAccelerator('1');
-		c.gridx = 1;
-		c.gridy = GridBagConstraints.RELATIVE;
-		content.add(textField2, c);
-		textField2.setFocusAccelerator('2');
-		content.add(textField3, c);
-		textField3.setFocusAccelerator('3');
-		content.add(textField4, c);
-		textField4.setFocusAccelerator('4');
-		content.add(textField5, c);
-		textField5.setFocusAccelerator('5');
-		content.add(textField6, c);
-		textField6.setFocusAccelerator('6');
-		content.add(textField7, c);
-		textField7.setFocusAccelerator('7');
-		content.add(textField8, c);
-		textField8.setFocusAccelerator('8');
-		content.add(textField9, c);
-		textField9.setFocusAccelerator('9');
-		content.add(textField10, c);
-		textField10.setFocusAccelerator('A');
-		content.add(textField11, c);
-		textField11.setFocusAccelerator('B');
-		content.add(textField12, c);
-		textField12.setFocusAccelerator('C');
-		content.add(textField13, c);
-		textField13.setFocusAccelerator('D');
-		c.weightx = 0.0;
-		c.fill = GridBagConstraints.NONE;
-
-
-		frameField.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frameField.pack();
-		frameField.setLocationRelativeTo(null);
-		frameField.setAlwaysOnTop(true);
-		frameField.setName("Fields");
-		frameField.setResizable(true);
-		frameField.setTitle("Fields");
-		frameField.setVisible(true);	
-	}
-
-	/**
-	 * Rules violation check.
-	 */
-	public void rulesViolationCheck(){
-		JLabel rulesLabel1, rulesLabel2, rulesLabel3, rulesLabel4, rulesLabel5, rulesLabel6, rulesLabel7, rulesLabel8, 
-		rulesLabel9, rulesLabel10, rulesLabel11, rulesLabel12, rulesLabel13, rulesLabel14, rulesLabel15;
-
-		JFrame frameField = new JFrame("Fileds");
-		java.awt.Container content = frameField.getContentPane();
-		content.setLayout(new GridBagLayout());
-		content.setBackground(UIManager.getColor("control"));
-		GridBagConstraints c = new GridBagConstraints();
-
-		c.gridx = 0;
-		c.gridy = GridBagConstraints.RELATIVE;
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.insets = new Insets(2, 2, 2, 2);
-		c.anchor = GridBagConstraints.EAST;
-
-		//JPanel Field1 = new JPanel(new BorderLayout());
-		rulesLabel1 = new JLabel("Rule 1", SwingConstants.RIGHT);
-		rulesLabel2 = new JLabel("Rule 2", SwingConstants.RIGHT);
-		rulesLabel3 = new JLabel("Rule 3", SwingConstants.RIGHT);
-		rulesLabel4 = new JLabel("Rule 4", SwingConstants.RIGHT);
-		rulesLabel5 = new JLabel("Rule 5", SwingConstants.RIGHT);
-		rulesLabel6 = new JLabel("Rule 6", SwingConstants.RIGHT);
-		rulesLabel7 = new JLabel("Rule 7", SwingConstants.RIGHT);
-		rulesLabel8 = new JLabel("Rule 8", SwingConstants.RIGHT);
-		rulesLabel9 = new JLabel("Rule 9", SwingConstants.RIGHT);
-		rulesLabel10 = new JLabel("Rule 10", SwingConstants.RIGHT);
-		rulesLabel11 = new JLabel("Rule 11", SwingConstants.RIGHT);
-		rulesLabel12 = new JLabel("Rule 12", SwingConstants.RIGHT);
-		rulesLabel13 = new JLabel("Rule 13", SwingConstants.RIGHT);
-		rulesLabel14 = new JLabel("Rule 14", SwingConstants.RIGHT);
-		rulesLabel15 = new JLabel("Rule 15", SwingConstants.RIGHT);
-
-		content.add(rulesLabel1, c);
-		rulesLabel1.setDisplayedMnemonic('1');
-		content.add(rulesLabel2, c);
-		rulesLabel2.setDisplayedMnemonic('2');
-		content.add(rulesLabel3, c);
-		rulesLabel3.setDisplayedMnemonic('3');
-		content.add(rulesLabel4, c);
-		rulesLabel4.setDisplayedMnemonic('4');
-		content.add(rulesLabel5, c);
-		rulesLabel5.setDisplayedMnemonic('5');
-		content.add(rulesLabel6, c);
-		rulesLabel6.setDisplayedMnemonic('6');
-		content.add(rulesLabel7, c);
-		rulesLabel7.setDisplayedMnemonic('7');
-		content.add(rulesLabel8, c);
-		rulesLabel8.setDisplayedMnemonic('8');
-		content.add(rulesLabel9, c);
-		rulesLabel9.setDisplayedMnemonic('9');
-		content.add(rulesLabel10, c);
-		rulesLabel10.setDisplayedMnemonic('A');
-		content.add(rulesLabel11, c);
-		rulesLabel11.setDisplayedMnemonic('B');
-		content.add(rulesLabel12, c);
-		rulesLabel12.setDisplayedMnemonic('C');
-		content.add(rulesLabel13, c);
-		rulesLabel13.setDisplayedMnemonic('D');
-		content.add(rulesLabel14, c);
-		rulesLabel14.setDisplayedMnemonic('E');
-		content.add(rulesLabel15, c);
-		rulesLabel15.setDisplayedMnemonic('F');
-
-		c.gridx = 1;
-		c.gridy = 0;
-		c.weightx = 1.0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.CENTER;
-
-		rulesText1 = new JTextField(15);
-		rulesText2 = new JTextField(15);
-		rulesText3 = new JTextField(15);
-		rulesText4 = new JTextField(15);
-		rulesText5 = new JTextField(15);
-		rulesText6 = new JTextField(15);
-		rulesText7 = new JTextField(15);
-		rulesText8 = new JTextField(15);
-		rulesText9 = new JTextField(15);
-		rulesText10 = new JTextField(15);
-		rulesText11 = new JTextField(15);
-		rulesText12 = new JTextField(15);
-		rulesText13 = new JTextField(15);
-		rulesText14 = new JTextField(15);
-		rulesText15 = new JTextField(15);
-
-		content.add(rulesText1, c);
-		rulesText1.setFocusAccelerator('1');
-		c.gridx = 1;
-		c.gridy = GridBagConstraints.RELATIVE;
-		content.add(rulesText2, c);
-		rulesText2.setFocusAccelerator('2');
-		content.add(rulesText3, c);
-		rulesText3.setFocusAccelerator('3');
-		content.add(rulesText4, c);
-		rulesText4.setFocusAccelerator('4');
-		content.add(rulesText5, c);
-		rulesText5.setFocusAccelerator('5');
-		content.add(rulesText6, c);
-		rulesText6.setFocusAccelerator('6');
-		content.add(rulesText7, c);
-		rulesText7.setFocusAccelerator('7');
-		content.add(rulesText8, c);
-		rulesText8.setFocusAccelerator('8');
-		content.add(rulesText9, c);
-		rulesText9.setFocusAccelerator('9');
-		content.add(rulesText10, c);
-		rulesText10.setFocusAccelerator('A');
-		content.add(rulesText11, c);
-		rulesText11.setFocusAccelerator('B');
-		content.add(rulesText12, c);
-		rulesText12.setFocusAccelerator('C');
-		content.add(rulesText13, c);
-		rulesText13.setFocusAccelerator('D');
-		content.add(rulesText14, c);
-		rulesText14.setFocusAccelerator('E');
-		content.add(rulesText15, c);
-		rulesText15.setFocusAccelerator('F');
-		c.weightx = 0.0;
-		c.fill = GridBagConstraints.NONE;
-
-		rulesText1.setText(String.valueOf(0));
-		rulesText2.setText(String.valueOf(0));
-		rulesText3.setText(String.valueOf(0));
-		rulesText4.setText(String.valueOf(0));
-		rulesText5.setText(String.valueOf(0));
-		rulesText6.setText(String.valueOf(0));
-		rulesText7.setText(String.valueOf(0));
-		rulesText8.setText(String.valueOf(0));
-		rulesText9.setText(String.valueOf(0));
-		rulesText10.setText(String.valueOf(0));
-		//rulesText11.setText(String.valueOf(0));
-		// rulesText12.setText(String.valueOf(0));
-		//rulesText13.setText(String.valueOf(0));
-		//rulesText14.setText(String.valueOf(0));
-		// rulesText15.setText(String.valueOf(0));
-
-
-
-		frameField.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frameField.pack();
-		frameField.setLocationRelativeTo(null);
-		frameField.setAlwaysOnTop(true);
-		frameField.setName("Violation Check");
-		frameField.setResizable(true);
-		frameField.setTitle("Violation Check");
-		frameField.setVisible(true);	
-	}
-
 }

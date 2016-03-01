@@ -30,7 +30,7 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
-import wifidirect.nodemovement.Visualizer;
+import wifi.WifiManager;
 
 
 // TODO: Auto-generated Javadoc
@@ -40,100 +40,102 @@ import wifidirect.nodemovement.Visualizer;
 public class WifiP2pManager implements EDProtocol{
 
 	/** The Constant CONNECTED. */
-	private static final int CONNECTED   = 0;
-	
+	public static final int CONNECTED   = 0;
+
 	/** The Constant INVITED. */
-	private static final int INVITED     = 1;
-	
+	public static final int INVITED     = 1;
+
 	/** The Constant FAILED. */
-	private static final int FAILED      = 2;
-	
+	public static final int FAILED      = 2;
+
 	/** The Constant AVAILABLE. */
-	private static final int AVAILABLE   = 3;
-	
+	public static final int AVAILABLE   = 3;
+
 	/** The Constant UNAVAILABLE. */
-	private static final int UNAVAILABLE = 4;
+	public static final int UNAVAILABLE = 4;
 
 	/** The Constant PAR_LISTENER. */
 	private static final String PAR_LISTENER = "listeners"; /**  eventDetection protocol for event-based simulation *. */
 	private static final String PAR_PROTOCOL = "linkable";
-	
+
 	/** The Constant PAR_P2PINFO. */
 	private static final String PAR_P2PINFO 	= "p2pinfo";	  /**  P2PInfo protocol for event-based simulation *. */
 	private static final String PAR_TRASP0 	= "transport0"; // Zero delay Zero Drop Rate
-	
+
 	/** The Constant PAR_TRASP1. */
 	private static final String PAR_TRASP1 	= "transport1"; // Peer Discovery and so on
-	
+
 	/** The Constant PAR_TRASP2. */
 	private static final String PAR_TRASP2 	= "transport2"; // Service Discovery and so on
-	
+
 	/** The Constant PAR_TRASP3. */
 	private static final String PAR_TRASP3 	= "transport3"; // Socket Message Delivery
-	
+
 	/** The Constant PAR_TRASP4. */
 	private static final String PAR_TRASP4 	= "transport4"; // Group Invitation
-	
+
 	/** The Constant PAR_TRASP5. */
 	private static final String PAR_TRASP5 	= "transport5"; // Internal delivery
 
 	/** The transport id0. */
 	private int transportId0;
-	
+
 	/** The transport id1. */
 	private int transportId1;
-	
+
 	/** The transport id2. */
 	private int transportId2;
-	
+
 	/** The transport id3. */
 	private int transportId3;
-	
+
 	/** The transport id4. */
 	private int transportId4;
-	
+
 	/** The transport id5. */
 	private int transportId5;
-	
+
 	/** The linkable id. */
 	private int linkableId;
-	
+
 	/** The listener pid. */
 	private int listenerPid;
-	
+
 	/** The p2p info pid. */
 	private int p2pInfoPid;
-	
-    /**
-     * The lookup key for an int that indicates whether Wi-Fi p2p is enabled or disabled.
-     * Retrieve it with {@link android.content.Intent#getIntExtra(String,int)}.
-     *
-     * @see #WIFI_P2P_STATE_DISABLED
-     * @see #WIFI_P2P_STATE_ENABLED
-     */
-    public static final String EXTRA_WIFI_STATE = "wifi_p2p_state";
-    /**
-     * Wi-Fi p2p is disabled.
-     *
-     * @see #WIFI_P2P_STATE_CHANGED_ACTION
-     * @see #getWifiP2pState()
-     */
-    public static final int WIFI_P2P_STATE_DISABLED = 1;
-    /**
-     * Wi-Fi p2p is enabled.
-     *
-     * @see #WIFI_P2P_STATE_CHANGED_ACTION
-     * @see #getWifiP2pState()
-     */
-    public static final int WIFI_P2P_STATE_ENABLED = 2;
+
+	private int wifimanagerpid;
+
+	/**
+	 * The lookup key for an int that indicates whether Wi-Fi p2p is enabled or disabled.
+	 * Retrieve it with {@link android.content.Intent#getIntExtra(String,int)}.
+	 *
+	 * @see #WIFI_P2P_STATE_DISABLED
+	 * @see #WIFI_P2P_STATE_ENABLED
+	 */
+	public static final String EXTRA_WIFI_STATE = "wifi_p2p_state";
+	/**
+	 * Wi-Fi p2p is disabled.
+	 *
+	 * @see #WIFI_P2P_STATE_CHANGED_ACTION
+	 * @see #getWifiP2pState()
+	 */
+	public static final int WIFI_P2P_STATE_DISABLED = 1;
+	/**
+	 * Wi-Fi p2p is enabled.
+	 *
+	 * @see #WIFI_P2P_STATE_CHANGED_ACTION
+	 * @see #getWifiP2pState()
+	 */
+	public static final int WIFI_P2P_STATE_ENABLED = 2;
 
 	/** The this node. */
-	public Node thisNode = Network.get(CommonState.r.nextInt(Network.size()));  // initiate with some node just to avoid "if (thisNode!=null)"
+	public Node thisNode;
 	/** The this pid. */
-	public int thisPid = 0;
-	
+	public int thisPid;
+
 	/** The msg handler. */
-	private Callback msgHandler = null;
+	private Callback msgHandler;
 
 	/**
 	 * Instantiates a new wifi p2p manager.
@@ -150,6 +152,10 @@ public class WifiP2pManager implements EDProtocol{
 		transportId5 = Configuration.getPid(prefix + "." + PAR_TRASP5);
 		p2pInfoPid 	 = Configuration.getPid(prefix + "." + PAR_P2PINFO);
 		listenerPid  = Configuration.getPid(prefix + "." + PAR_LISTENER);
+		wifimanagerpid = Configuration.getPid(prefix + "." + "wifimanager");
+		thisNode 	 = Network.get(0);	// initiate with some node just to avoid "if (thisNode!=null)"
+		thisPid 	 = 0;
+		msgHandler 	 = null;
 	}
 
 	/** (non-Javadoc)
@@ -301,8 +307,8 @@ public class WifiP2pManager implements EDProtocol{
 				// if there is free space for new client
 				if (nodeInfo.currentGroup.getGroupSize()<nodeInfo.getGroupLimit()){ 
 					nodeInfo.currentGroup.addNode(message.srcNode);
-				
-				// if there is not free space for new client
+
+					// if there is not free space for new client
 				}else{
 					Message newMessage 	= new Message();
 					newMessage.destNode = message.srcNode;
@@ -370,13 +376,24 @@ public class WifiP2pManager implements EDProtocol{
 
 					callbackMessage cMessage = (callbackMessage) message.object;
 					if(msgHandler!=null){
-						
+						msgHandler.handleMessage(cMessage);
+					}
+				}
+			}
+
+			//considering delivery from WiFi Interface
+			WifiManager senderWifiManager = (WifiManager) message.srcNode.getProtocol(wifimanagerpid);
+			if(senderWifiManager.BSSID!=null){
+				if(nodeInfo.isGroupOwner() && nodeInfo.currentGroup.getNodeList().contains(message.srcNode)
+						&& senderWifiManager.BSSID.equals(String.valueOf(thisNode.getID()))){
+					callbackMessage cMessage = (callbackMessage) message.object;
+					if(msgHandler!=null){
 						msgHandler.handleMessage(cMessage);
 					}
 				}
 			}
 			break;
-			
+
 		case "REQUEST_WIFI_CONNECT":
 			if(nodeInfo.isGroupOwner() && nodeInfo.currentGroup.getGroupSize()<=WifiP2pGroup.groupCapacity){
 				nodeInfo.currentGroup.addNode(message.srcNode);
@@ -390,19 +407,6 @@ public class WifiP2pManager implements EDProtocol{
 			}
 			break;
 		}
-	}
-
-	/**
-	 * The Interface Callback. This Interface will be used by the sockets to deliver messages
-	 */
-	public interface Callback extends EventListener {
-		
-		/**
-		 * Handle message.
-		 *
-		 * @param msg the msg
-		 */
-		public void handleMessage(callbackMessage msg);
 	}
 
 	/**
@@ -684,6 +688,7 @@ public class WifiP2pManager implements EDProtocol{
 		nodeInfo.currentGroup.setGroupValid(true);
 		nodeInfo.currentGroup.setGroupOwner(thisNode);
 		nodeInfo.currentGroup.setmInterface("Node_" + thisNode.getID() + "_AP");
+		nodeInfo.currentGroup.BSSID = String.valueOf(thisNode.getID());
 		nodeInfo.currentGroup.setmPassphrase(String.valueOf(CommonState.r.nextLong()));
 		nodeInfo.currentGroup.setmNetId(CommonState.r.nextInt());
 		nodeInfo.setStatus(CONNECTED);
@@ -816,6 +821,9 @@ public class WifiP2pManager implements EDProtocol{
 		wpm.transportId3 	= transportId3;
 		wpm.transportId4 	= transportId4;
 		wpm.transportId5 	= transportId5;
+		wpm.thisNode		= Network.get(0);
+		wpm.thisPid			= 0;
+		wpm.msgHandler		= null;
 		return wpm;	
 	}
 
@@ -827,40 +835,91 @@ public class WifiP2pManager implements EDProtocol{
 	 * @return the string
 	 */
 	public String send(callbackMessage cMessage, String rMacAddress){
-		nodeP2pInfo nodeInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
+		nodeP2pInfo senderInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
+		WifiManager senderWifiManager = (WifiManager) thisNode.getProtocol(wifimanagerpid);
 		Long receiverAddress = Long.parseLong(rMacAddress);
-		//find reciver node by address (nodeID)
+
+
+
+		//find receiver node by address (nodeID)
 		Node receiver = null;
+		nodeP2pInfo receiverInfo = null;
+		WifiManager receiverWifiManager = null;
 		for(int i=0; i<Network.size(); i++){
 			if(Network.get(i).getID()==receiverAddress){
 				receiver = Network.get(i);
+				receiverInfo = (nodeP2pInfo) receiver.getProtocol(p2pInfoPid);
+				receiverWifiManager = (WifiManager) receiver.getProtocol(wifimanagerpid);
 				break;
 			}
 		}
-		if(receiver!=null){
-			if(nodeInfo.getStatus()!=CONNECTED){
+
+
+
+		if(receiver!=null && receiverInfo!=null && senderWifiManager!=null && receiverWifiManager!=null){
+			if(!(senderInfo.getStatus()==CONNECTED || senderWifiManager.getWifiStatus()==CONNECTED)){
 				return "This device is not connected!";
+			}else if (!(receiverInfo.getStatus()==CONNECTED || receiverWifiManager.getWifiStatus()==CONNECTED)){
+				return "Receiver device is not connected!";			
+			}else {
+
+				// first check if this Node is not group owner and is connected to the group owner via wifi direct interface
+				if(!senderInfo.isGroupOwner() && receiverInfo.isGroupOwner() && senderInfo.getGroupOwner()!=null && receiverInfo.currentGroup!=null){
+					if(senderInfo.getGroupOwner().getID()==receiver.getID() && receiverInfo.currentGroup.getNodeList().contains(thisNode)){
+						Transport transport3 = (Transport) thisNode.getProtocol(transportId3);
+						Message message 	= new Message();
+						message.destNode 	= receiver;
+						message.destPid 	= thisPid;
+						message.event 		= "SOCKET_DELIVERY";
+						message.object 		= cMessage;
+						message.srcNode 	= thisNode;
+						message.srcPid 		= thisPid;
+						transport3.send(message.srcNode, message.destNode, message, message.destPid);	
+						return "Message Sent!";
+					}
+					// if this node is group owner
+				}else if (senderInfo.isGroupOwner() && !receiverInfo.isGroupOwner()){
+					if(receiverInfo.getGroupOwner()!=null && senderInfo.currentGroup!=null){
+						if(receiverInfo.getGroupOwner().getID()==thisNode.getID() && senderInfo.currentGroup.getNodeList().contains(receiver)){
+
+							Transport transport3 = (Transport) thisNode.getProtocol(transportId3);
+							Message message 	= new Message();
+							message.destNode 	= receiver;
+							message.destPid 	= thisPid;
+							message.event 		= "SOCKET_DELIVERY";
+							message.object 		= cMessage;
+							message.srcNode 	= thisNode;
+							message.srcPid 		= thisPid;
+							transport3.send(message.srcNode, message.destNode, message, message.destPid);	
+							return "Message Sent!";
+						}
+					}
+					// extend the above condition to legacy wifi devices
+					if(receiverWifiManager.apSSID!=null && senderInfo.currentGroup!=null){
+						if(receiverWifiManager.apSSID.equals(senderInfo.currentGroup.getSSID()) && senderInfo.currentGroup.getNodeList().contains(receiver)){
+							Transport transport3 = (Transport) thisNode.getProtocol(transportId3);
+							Message message 	= new Message();
+							message.destNode 	= receiver;
+							message.destPid 	= wifimanagerpid;
+							message.event 		= "SOCKET_DELIVERY";
+							message.object 		= cMessage;
+							message.srcNode 	= thisNode;
+							message.srcPid 		= thisPid;
+							transport3.send(message.srcNode, message.destNode, message, message.destPid);	
+							return "Message Sent!";
+						}	
+					}					
+				}else{
+					return "Cannot send message to the destination: Destination is not inside the group";
+				}
 			}
-			if ((!nodeInfo.isGroupOwner() && receiver.getID()!=nodeInfo.getGroupOwner().getID()) || 
-					(nodeInfo.isGroupOwner() && !nodeInfo.currentGroup.getNodeList().contains(receiver))){
-				return "Cannot send message to the destination: Destination is not inside the group";
-			}
-			Transport transport3 = (Transport) thisNode.getProtocol(transportId3);
-			Message message 	= new Message();
-			message.destNode 	= receiver;
-			message.destPid 	= thisPid;
-			message.event 		= "SOCKET_DELIVERY";
-			message.object 		= cMessage;
-			message.srcNode 	= thisNode;
-			message.srcPid 		= thisPid;
-			
-			transport3.send(message.srcNode, message.destNode, message, message.destPid);	
-			return "Message Sent!";
 		}else{
 			return "Receiver is not recognized";
 		}
+
+		return "Message Not Sent";
 	}
-	
+
 	public int getExtraSystemInfo(String extra){
 		nodeP2pInfo nodeInfo = (nodeP2pInfo) thisNode.getProtocol(p2pInfoPid);
 		int returnState = 60000;

@@ -23,7 +23,7 @@ package applications.dummy;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
-import wifidirect.nodemovement.Visualizer;
+import visualization.Visualizer;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -84,7 +84,7 @@ public class sDeviation implements Control{
 				meanValue = newApp.value+meanValue;
 			}
 			meanValue = meanValue/Network.size();
-			Visualizer.textField13.setText(String.valueOf(meanValue));
+		//	Visualizer.textField13.setText(String.valueOf(meanValue));
 
 		}
 		if(cycle>3){
@@ -96,11 +96,11 @@ public class sDeviation implements Control{
 			if (sDeviation<0.15){
 				return true;
 			}
-			Visualizer.textField12.setText(String.valueOf(sDeviation));
+			//Visualizer.textField12.setText(String.valueOf(sDeviation));
 //			if(cycle%100==0){
 //				writer.println(CommonState.getTime() + "        " + sDeviation);
 //			}
-			Max_Con = (Integer.parseInt(Visualizer.textField7.getText())> Max_Con)? Integer.parseInt(Visualizer.textField7.getText()):Max_Con;
+			//Max_Con = (Integer.parseInt(Visualizer.textField7.getText())> Max_Con)? Integer.parseInt(Visualizer.textField7.getText()):Max_Con;
 		}
 		if(cycle==3000) {
 			System.out.println("Max_Con: " + Max_Con);

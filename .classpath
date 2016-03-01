@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre7"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/ant-1.8.2.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/ant-launcher-1.8.2.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/base64-2.3.8.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/bcmail-jdk16-1.46.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/bcprov-jdk16-1.46.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/commons-collections-3.2.1.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/commons-io-2.4.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/commons-lang-2.6.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/djep-1.0.0.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/GeoLayout.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/gephi-toolkit.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/gexf4j-0.4.4-BETA.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/guava-18.0.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/jep-2.3.0.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/junit-addons-1.4.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/opencsv-3.3.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/peersim-doclet.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/slf4j-api-1.6.1.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/src.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/stax-1.2.0.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/stax2-api-3.1.1.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/woodstox-core-asl-4.2.0.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/xmlunit-1.6.jar"/>
-	<classpathentry kind="lib" path="E:/Polimi/adt-bundle-windows-x86_64-20140702/WiDiSim/libs/peersim.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/peersim.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/ant-1.8.2.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/ant-launcher-1.8.2.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/base64-2.3.8.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/bcmail-jdk16-1.46.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/bcprov-jdk16-1.46.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/djep-1.0.0.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/GeoLayout.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/gephi-toolkit.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/gexf4j-0.4.4-BETA.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/guava-18.0.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/jep-2.3.0.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/junit-addons-1.4.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/opencsv-3.3.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/peersim-doclet.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/slf4j-api-1.6.1.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/src.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/stax-1.2.0.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/stax2-api-3.1.1.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/woodstox-core-asl-4.2.0.jar"/>
+	<classpathentry kind="lib" path="E:/Polimi/Mars_WorkSpace/WiDiSim/libs/xmlunit-1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -63,7 +63,7 @@ public class UnreliableTransportModified implements Transport{
 	public static final String PAR_LLM = "lowlayermodel";
 	
 	/** The lowlayer pid. */
-	public final int lowlayerPid;
+	public int lowlayerPid;
 	
 
 	//---------------------------------------------------------------------
@@ -71,7 +71,7 @@ public class UnreliableTransportModified implements Transport{
 	//---------------------------------------------------------------------
 
 	/**  Protocol identifier for the support transport protocol. */
-	private final int transport;
+	private int transport;
 
 	/**
 	 *  Probability of dropping messages
@@ -90,8 +90,7 @@ public class UnreliableTransportModified implements Transport{
 	 */
 	public UnreliableTransportModified(String prefix)
 	{
-		transport = Configuration.getPid(prefix+"."+PAR_TRANSPORT);
-		//loss = (float) Configuration.getDouble(prefix+"."+PAR_DROP);
+		transport 		= Configuration.getPid(prefix+"."+PAR_TRANSPORT);
 		lowlayerPid 	= Configuration.getPid(prefix + "." + PAR_LLM);
 	}
 
