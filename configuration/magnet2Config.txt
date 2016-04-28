@@ -1,7 +1,7 @@
-######################################################################################################
+s######################################################################################################
 ########### Simulation parameters ######################
 random.seed 		1234567890
-network.size 		130
+network.size 		200
 
 ######Simulation.endtime could be the number of cycles for controls
 simulation.endtime 	9000000
@@ -9,10 +9,10 @@ simulation.logtime 	100
 simulation.experiments 1
 
 #Network Dynamic
-MIN_NET_SIZE 		130
-MAX_NET_SIZE 		130
+MIN_NET_SIZE 		200
+MAX_NET_SIZE 		200
 NET_ADD_STEP 		1
-SIN_PERIOD 			1000
+SIN_PERIOD 			10000
 NET_ADD_CYCLE_START 1
 NET_ADD_CYCLE_END 	simulation.endtime
 
@@ -125,15 +125,8 @@ control.move NodeMovement
 	step 			1
 }
 
-########## Calculating sDeviation ################################
-control.sDev sDeviation
-{
-	application		test1
-	step 			1
-}
-
 ########### Ordering the controls execution ############
-order.control 	dnet, move, viz, sDev, vioch, routestats
+order.control 	dnet, move, viz, vioch, routestats
 
 ######################################################################################################
 #############    CDPROTOCOLS    ########################
@@ -167,11 +160,13 @@ protocol.wifimanager WifiManager
 }
 
 ########### test application  ##########################
-protocol.test1 newApplication
+protocol.test1 application.magnet2.WiFiServiceDiscoveryActivity
 {
 	p2pmanager 		p2pmanager
-	wifimanager		wifimanager
 	p2pinfo 		nodinf
+	wifimanager		wifimanager
+	transport0      tr0
+	routaodv		aodv
 	step 			1
 }
 

@@ -10,7 +10,7 @@ In the following, the most important ones have been stated:
 General rules:
 • A peer cannot connect to another peer outside its proximity range
 • A group cannot consist of more than pre-defined number of peers
-• A peer cannot see more than pre-defined number of devices and services
+• A peer cannot discover more than pre-defined number of devices and services
 • A peer cannot discover devices and services outside its radio range
 
 Wi-Fi Direct rules:
@@ -21,9 +21,11 @@ Wi-Fi Direct rules:
 • A group owner is always discoverable
 • When two P2P devices negotiate to decide the GO role, that device with higher intention should become the group owner.
 • If the group owner fails, the group should be terminated
+• GroupOwner roles cannot be transferred inside a group before terminating the group
+• Events generation rules as discussed in the paper
 
 Android rules: 
-• A Client cannot communicate with another client in the same group directly
-• The discovery remains active until a connection is initiated, or a P2P group is formed (for clients)
+• A Client cannot communicate with another client in the same group directly (the message should be passed through the group owner - channel delay will be applied)
+• The discovery remains active until a connection is initiated, or a P2P group is formed (for clients)- (this rule is not fixed in different android APIs)
 
 These rules cover the most important aspects of the Wi-Fi Direct behavior.

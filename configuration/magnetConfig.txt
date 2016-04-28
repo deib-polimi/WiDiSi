@@ -67,7 +67,7 @@ control.routestats statsCollector
 }
 
 ########### Network Visualizer #########################
-control.viz Visualizer
+control.viz visualization.Visualizer
 {
 	p2pinfo 		nodinf
 	linkable 		lnk
@@ -160,7 +160,7 @@ protocol.wifimanager WifiManager
 }
 
 ########### test application  ##########################
-protocol.test1 WiFiServiceDiscoveryActivity
+protocol.test1 applications.magnet.WiFiServiceDiscoveryActivity
 {
 	p2pmanager 		p2pmanager
 	p2pinfo 		nodinf

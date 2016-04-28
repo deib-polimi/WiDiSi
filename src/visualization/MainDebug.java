@@ -10,10 +10,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Font;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import visualization.Visualizer;
 import wifidirect.nodemovement.NodeMovement;
 import javax.swing.JRadioButton;
 import javax.swing.JButton;
@@ -35,8 +38,8 @@ public class MainDebug {
 	public JTextField cycleLengthInfo;
 	public JTextField timeOutInfo;
 	public JTextField maxNeighbor;
-	public JTextField textField_12;
-	public JTextField textField_13;
+	public JTextField avShortestPath;
+	public JTextField shortestPathCount;
 	public JTextField textField_14;
 	public JTextField textField_15;
 	public JTextField ruleOneCheck;
@@ -231,25 +234,27 @@ public class MainDebug {
 		maxNeighbor.setBounds(383, 98, 63, 20);
 		frame.getContentPane().add(maxNeighbor);
 		
-		JLabel lblFree = new JLabel("N/A");
+		JLabel lblFree = new JLabel("Av Shortest Path");
 		lblFree.setBounds(271, 125, 106, 14);
 		frame.getContentPane().add(lblFree);
 		
-		textField_12 = new JTextField();
-		textField_12.setEditable(false);
-		textField_12.setColumns(10);
-		textField_12.setBounds(383, 125, 63, 20);
-		frame.getContentPane().add(textField_12);
+		avShortestPath = new JTextField();
+		avShortestPath.setToolTipText("");
+		avShortestPath.setEditable(false);
+		avShortestPath.setColumns(10);
+		avShortestPath.setBounds(383, 125, 63, 20);
+		frame.getContentPane().add(avShortestPath);
 		
-		JLabel lblFree_1 = new JLabel("N/A");
+		JLabel lblFree_1 = new JLabel("Shortest Path Count");
 		lblFree_1.setBounds(271, 147, 106, 14);
 		frame.getContentPane().add(lblFree_1);
 		
-		textField_13 = new JTextField();
-		textField_13.setEditable(false);
-		textField_13.setColumns(10);
-		textField_13.setBounds(383, 150, 63, 20);
-		frame.getContentPane().add(textField_13);
+		shortestPathCount = new JTextField();
+		shortestPathCount.setToolTipText("");
+		shortestPathCount.setEditable(false);
+		shortestPathCount.setColumns(10);
+		shortestPathCount.setBounds(383, 150, 63, 20);
+		frame.getContentPane().add(shortestPathCount);
 		
 		JLabel lblNa = new JLabel("N/A");
 		lblNa.setBounds(271, 175, 106, 14);
@@ -295,6 +300,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule);
 		
 		ruleOneCheck = new JTextField();
+		ruleOneCheck.setToolTipText("");
 		ruleOneCheck.setEditable(false);
 		ruleOneCheck.setBounds(47, 252, 46, 20);
 		frame.getContentPane().add(ruleOneCheck);
@@ -306,6 +312,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_1);
 		
 		ruleTwoCheck = new JTextField();
+		ruleTwoCheck.setToolTipText("");
 		ruleTwoCheck.setEditable(false);
 		ruleTwoCheck.setColumns(10);
 		ruleTwoCheck.setBounds(47, 274, 46, 20);
@@ -317,6 +324,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_2);
 		
 		ruleThreeCheck = new JTextField();
+		ruleThreeCheck.setToolTipText("");
 		ruleThreeCheck.setEditable(false);
 		ruleThreeCheck.setColumns(10);
 		ruleThreeCheck.setBounds(47, 297, 46, 20);
@@ -328,6 +336,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_3);
 		
 		ruleFourCheck = new JTextField();
+		ruleFourCheck.setToolTipText("");
 		ruleFourCheck.setEditable(false);
 		ruleFourCheck.setColumns(10);
 		ruleFourCheck.setBounds(137, 252, 46, 20);
@@ -338,6 +347,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_4);
 		
 		ruleFiveCheck = new JTextField();
+		ruleFiveCheck.setToolTipText("");
 		ruleFiveCheck.setEditable(false);
 		ruleFiveCheck.setColumns(10);
 		ruleFiveCheck.setBounds(137, 274, 47, 20);
@@ -349,6 +359,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_5);
 		
 		ruleSixCheck = new JTextField();
+		ruleSixCheck.setToolTipText("");
 		ruleSixCheck.setEditable(false);
 		ruleSixCheck.setColumns(10);
 		ruleSixCheck.setBounds(137, 297, 46, 20);
@@ -360,6 +371,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_6);
 		
 		ruleSevenCheck = new JTextField();
+		ruleSevenCheck.setToolTipText("");
 		ruleSevenCheck.setEditable(false);
 		ruleSevenCheck.setColumns(10);
 		ruleSevenCheck.setBounds(232, 249, 46, 20);
@@ -371,6 +383,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_7);
 		
 		ruleEightCheck = new JTextField();
+		ruleEightCheck.setToolTipText("");
 		ruleEightCheck.setEditable(false);
 		ruleEightCheck.setColumns(10);
 		ruleEightCheck.setBounds(232, 274, 46, 20);
@@ -381,6 +394,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_8);
 		
 		ruleNineCheck = new JTextField();
+		ruleNineCheck.setToolTipText("");
 		ruleNineCheck.setEditable(false);
 		ruleNineCheck.setColumns(10);
 		ruleNineCheck.setBounds(232, 297, 46, 20);
@@ -392,6 +406,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_9);
 		
 		ruleTenCheck = new JTextField();
+		ruleTenCheck.setToolTipText("");
 		ruleTenCheck.setEditable(false);
 		ruleTenCheck.setColumns(10);
 		ruleTenCheck.setBounds(336, 249, 46, 20);
@@ -402,6 +417,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_10);
 		
 		ruleElevenCheck = new JTextField();
+		ruleElevenCheck.setToolTipText("");
 		ruleElevenCheck.setEditable(false);
 		ruleElevenCheck.setColumns(10);
 		ruleElevenCheck.setBounds(336, 271, 46, 20);
@@ -412,6 +428,7 @@ public class MainDebug {
 		frame.getContentPane().add(lblRule_11);
 		
 		ruleTwelveCheck = new JTextField();
+		ruleTwelveCheck.setToolTipText("");
 		ruleTwelveCheck.setEditable(false);
 		ruleTwelveCheck.setColumns(10);
 		ruleTwelveCheck.setBounds(336, 294, 46, 20);
@@ -845,4 +862,3 @@ public class MainDebug {
 		mnMenu.add(mntmIExit);
 	}
 }
-

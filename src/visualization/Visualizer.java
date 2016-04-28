@@ -64,6 +64,9 @@ import javax.swing.JTextArea;
 
 import javax.swing.border.EmptyBorder;
 
+import org.gephi.data.attributes.api.AttributeColumn;
+import org.gephi.data.attributes.api.AttributeController;
+import org.gephi.data.attributes.api.AttributeModel;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.io.exporter.api.ExportController;
@@ -83,6 +86,7 @@ import org.gephi.ranking.api.Ranking;
 import org.gephi.ranking.api.RankingController;
 import org.gephi.ranking.api.Transformer;
 import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
+import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import peersim.config.Configuration;
@@ -252,6 +256,13 @@ public class Visualizer implements Control{
 			mDwindow.pauseSimBut.setSelected(false);
 
 			pNodeColor = new ColorImpl[1000];
+			for(int i=0; i<pNodeColor.length; i++){
+				ColorImpl BlackColor = new ColorImpl();
+				BlackColor.setB(0);
+				BlackColor.setG(0);
+				BlackColor.setR(0);
+				pNodeColor[i] =  BlackColor;
+			}
 			startTimeReal = System.currentTimeMillis();	
 		}
 
@@ -725,14 +736,20 @@ public class Visualizer implements Control{
 			PositionImpl nodePosition = new PositionImpl();
 			if(cycle == 5 || cycle%20==0){
 				ColorImpl nodeColor = new ColorImpl();
-				if(nodeInfo.isGroupOwner() && nodeInfo.getStatus()==CONNECTED){
+				// Initialize to avoid null
+				
+				if(nodeInfo.isGroupOwner() && nodeInfo.getStatus()==CONNECTED && wifiManager.getWifiStatus()!=CONNECTED){
 					nodeColor.setB(0);
 					nodeColor.setG(255);
 					nodeColor.setR(0);
-				}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()==CONNECTED &&  nodeInfo.getStatus()==CONNECTED){
-					nodeColor.setB(255);
+				}else if(nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()==CONNECTED &&  nodeInfo.getStatus()==CONNECTED){
+					nodeColor.setB(0);
 					nodeColor.setG(0);
-					nodeColor.setR(255);	
+					nodeColor.setR(0);	
+				}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()==CONNECTED &&  nodeInfo.getStatus()==CONNECTED){
+					nodeColor.setB(100);
+					nodeColor.setG(0);
+					nodeColor.setR(0);	
 				}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()!=CONNECTED && nodeInfo.getStatus()==CONNECTED){
 					nodeColor.setB(254);
 					nodeColor.setG(0);
@@ -929,13 +946,31 @@ public class Visualizer implements Control{
 			ex.printStackTrace();
 			//return true;
 		}
-
+        //698
 		//Append imported data to GraphAPI
 		importController.process(container, new DefaultProcessor(), workspace);
 
 		//Get graph model of current workspace
 		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-
+		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+		
+		EdgeBetweenness eBetween = new EdgeBetweenness();
+		eBetween.setDirected(false);
+		eBetween.doNormalize(true);
+		eBetween.execute(graphModel, attributeModel);
+		if(mDwindow!=null){
+			mDwindow.shortestPathCount.setText(String.valueOf(String.valueOf(eBetween.getEdgeBetweenness())));
+		}
+				
+		GraphDistance gDistance = new GraphDistance();
+		gDistance.setDirected(false);
+		gDistance.setNormalized(true);
+		gDistance.execute(graphModel, attributeModel);
+		if(mDwindow!=null){
+			mDwindow.avShortestPath.setText(String.valueOf(gDistance.getPathLength()));
+		}
+		
+				
 		// Layout based on GeoLayout Plugin for Gephi
 		GeoLayout layout = new GeoLayout(null);
 		layout.setGraphModel(graphModel);

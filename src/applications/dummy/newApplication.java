@@ -16,10 +16,13 @@
  * 
  * Author: Naser Derakhshan
  * Politecnico di Milano
+ * 
+ * 
  *
  */
 package applications.dummy;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +33,7 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
+import visualization.Visualizer;
 import wifi.ScanResult;
 import wifi.WifiManager;
 import wifidirect.p2pcore.BroadcastReceiver;
@@ -114,6 +118,8 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 	 * @param prefix the prefix
 	 */
 	private WifiManager wifiManager;
+	
+	private Node thisNode;
 
 	/**
 	 * Instantiates a new new application.
@@ -136,6 +142,7 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 		manager = (WifiP2pManager) node.getProtocol(p2pmanagerId);
 		wifiManager = (WifiManager) node.getProtocol(wifimanagerPid);
 		nodeInfo = (nodeP2pInfo) node.getProtocol(p2pInfoPid);
+		thisNode = node;
 
 		if(cycle==1){	
 			manager.registerBroadcastReceiver(this);
@@ -192,11 +199,11 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 			if(isGroupeOwner){
 				for(WifiP2pDevice peer: peerList){
 					manager.send(cMessage, peer.deviceAddress);
-					//System.out.println("Node: " + node.getID() + " A message send to client: " + peer.deviceAddress );
+					Visualizer.print("Node: " + node.getID() + " A message send to client: " + peer.deviceAddress, Color.blue);
 				}
 			}else{
 				manager.send(cMessage, String.valueOf(nodeInfo.getGroupOwner().getID()));
-				//System.out.println("Node: " + node.getID() + " A message send to GO: " + nodeInfo.getGroupOwner().getID() );
+				Visualizer.print("Node: " + node.getID() + " A message send to GO: " + nodeInfo.getGroupOwner().getID(), Color.blue);
 			}
 		}
 		cycle++;	
@@ -239,7 +246,7 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 	 */
 	@Override
 	public void onConnectionInfoAvailable(WifiP2pInfo wifiInfo) {
-		//	Visualizer.print("Node: " + thisNode.getID() +" / onConnectionInfoAvailable: " + wifip2pevent);
+		Visualizer.print("Node: " + thisNode.getID() +" / onConnectionInfoAvailable", Color.blue);
 		isConnected = wifiInfo.groupFormed;
 		isGroupeOwner = wifiInfo.isGroupOwner;
 	}
@@ -249,7 +256,7 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 	 */
 	@Override
 	public void onGroupInfoAvailable(WifiP2pGroup groupInfo) {
-		//Visualizer.print("Node: " + thisNode.getID() +" / onGroupInfoAvailable: " + wifip2pevent);
+		Visualizer.print("Node: " + thisNode.getID() +" / onGroupInfoAvailable", Color.blue);
 	}
 
 	/* (non-Javadoc)
@@ -257,8 +264,8 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 	 */
 	@Override
 	public void onDnsSdTxtRecordAvailable(String fullDomainName, Map<String, String> record, WifiP2pDevice srcDevice) {
-//	if(thisNode!=null)
-//		Visualizer.print("Node: " + thisNode.getID() +" / onDnsSdTxtRecordAvailable: " + record);
+	if(thisNode!=null)
+		Visualizer.print("Node: " + thisNode.getID() +" / onDnsSdTxtRecordAvailable: " + record, Color.blue);
 	}
 
 	/* (non-Javadoc)
@@ -267,8 +274,8 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 	@Override
 	public void onDnsSdServiceAvailable(String instanceName,
 			String registrationType, WifiP2pDevice srcDevice) {
-		//if(thisNode.getID()==0)
-		//Visualizer.print("Node: " + thisNode.getID() +" / onDnsSdServiceAvailable: " + wifip2pevent);	
+		if(thisNode!=null)
+			Visualizer.print("Node: " + thisNode.getID() +" / onDnsSdServiceAvailable", Color.blue);	
 	}
 
 	/* (non-Javadoc)
@@ -302,7 +309,7 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 			
 			List<ScanResult> ScanResultList = new ArrayList<ScanResult>();
 			ScanResultList.addAll(wifiManager.getScanResults());
-			//Visualizer.print(ScanResultList);
+			Visualizer.print(ScanResultList, Color.blue);
 		}
 
 	}
@@ -327,7 +334,7 @@ GroupInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, Broadca
 			//System.out.println("New value: " + value);
 			break;
 		case MY_HANDLE:
-			//Visualizer.print("MY_HANDLE");
+			Visualizer.print("Node: " + thisNode.getID() + " MY_HANDLE", Color.blue);
 			break;
 		}
 	}
