@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>WiDiSi by nasser1941</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">WiDiSi</h1>
+      <h2 class="project-tagline">A WiFi Direct Simulator</h2>
+      <a href="https://github.com/nasser1941/WiDiSi" class="btn">View on GitHub</a>
+      <a href="https://github.com/nasser1941/WiDiSi/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/nasser1941/WiDiSi/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="widisi" class="anchor" href="#widisi" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>WiDiSi</h1>
+
+<p>A WiFi Direct Simulator</p>
+
+<p>WiDiSi is an open-source system-level simulator for Wi-Fi Direct networks. WiDiSi is based on <a href="http://peersim.sourceforge.net/">PeerSim</a>, a widely-used, open-source simulation framework for large-scale peer to peer networks. WiDiSi is presenting an environment that Wi-Fi direct applications in Android can be easily tested in large-scale dynamic scenarios. A user can create and modify various network parameters via a configuration text file before the simulation starts. </p>
+
+<p>The WiFi Direct API in WiDiSi is very similar to the <a href="http://developer.android.com/guide/topics/connectivity/wifip2p.html">WiFi Peer-to-Peer API in Android</a>. However, some changes should be applied before you test an Android application in the simulation environment. A first limitation is that WiDiSi is a single-threaded simulator; this means that all its internal components synchronize around Peersim cycles. Android applications, on the other hand, can be multi-threaded. To solve this discrepancy one can decide to use PeerSim in a hybrid mode, i.e., one in which both its cycle-driven and event-driven engines are used. A more detailed discussion on how to achieve this is provided at <a href="https://github.com/nasser1941/WiDiSi/blob/master/Multi-Threaded">https://github.com/nasser1941/WiDiSi/blob/master/Multi-Threaded</a>. A second limitation is that we only support Bonjour service discovery; we do not support UPnP or other service discovery mechanisms. A third limitation is that the channel that connects the application to the Wi-Fi P2P framework and channelListener are not available since they are not needed in our simulations. In Android an instance of a Channel is obtained by calling a specific initialize method. As a result, the initialize method is also not needed in our Simulator. A fourth limitation regards Android's use of listeners for asynchronous method calls to the API. In Android's implementation responses from an application are dealt with through listener callbacks provided by the application itself. There are two kinds of listeners that are used. Some listeners are used to inform the application whether a call to the framework has been successful or not. We assume that all method calls are always successful and therefore, did not implement these listeners. Others are used to inform the application that the required information is ready to be picked up. These are important to us, and we support the following ones:</p>
+
+<p>WifiP2pManager.ConnectionInfoListener: This is the interface for when connection info is available.
+WifiP2pManager.DnsSdServiceResponseListener: This is the interface for when a Bonjour service discovery response is received.
+WifiP2pManager.DnsSdTxtRecordListener: This is the interface for when a Bonjour TXT record is available for a service.
+WifiP2pManager.GroupInfoListener: This is the interface for when group info is available.
+WifiP2pManager.PeerListListener: This is the interface for when peer lists are updated.</p>
+
+<p>WiDiSi supports important functionalities of WiFi direct. These include Standard and autonomous group formation, device and service advertisement/discovery, group termination and simple socket delivery. all these functions follow the <a href="https://www.wi-fi.org/discover-wi-fi/specifications">WiFi P2P specification</a>.
+The other functionalities in WiFi Direct specification like Authentication, Encryption, and Power Management are modeled using configurable delays. These user-configurable delays are summerized as follow:</p>
+
+<p>1- SwitchingDelay is caused by switching the channels during the search phase. It represents the average time that two peers take to find a common channel;</p>
+
+<p>2- ChannelDelay mimics the time needed for the physical propagation of signals. It is the amount of time needed to ``successfully'' exchange one frame between two peers at the MAC layer;</p>
+
+<p>3- AuthenticationDelay is the user-dependent delay for authentication. It is the amount of time needed for the user to accept an invitation and perform the provisioning phase;</p>
+
+<p>4- EncryptionDelay is additional delay caused by the AES-CCMP encryption process;</p>
+
+<p>5- PowerManagementDelay is the amount of time that a device stays in sleeping mode;</p>
+
+<p>6- InternalProcessingDelay is the time taken to process a basic action.  </p>
+
+<p>To run the example following steps should be taken:
+1-  Download the WiDiSi source code from this website and import it to the Eclipse</p>
+
+<p>2-  Add all provided libraries inside the lib folder to the project by right clicking on the Project =&gt; properties =&gt; Java Build Path =&gt; Libraries =&gt; Add External JARs</p>
+
+<p>3-  Modify the configuration text (wifip2pconfig.txt) file inside the configuration folder to change all settings of the network if needed</p>
+
+<p>4-  Pass the path of this configuration file as an argument to the main class by right clicking on the project =&gt; Run As=&gt; Run Configurations =&gt; (x)Arguments --- and put the following arguments in the Program Arguments: “configuration\wifip2pconfig.txt” </p>
+
+<p>5-  Run the simulator</p>
+
+<p>6-  If asking which simulator to run, choose the class inside the WiFi direct package.</p>
+
+<p>7- You can change the control parameters like the speed of node movement or the number of nodes in the control panel. First, modify the value and then push SET once for the values to take effect.</p>
+
+<p><a href="https://github.com/nasser1941/WiDiSi/blob/master/doc/01.avi">A live Demo</a></p>
+
+<p>There are some pictures of the simulator environment:</p>
+
+<p><a href="https://github.com/nasser1941/WiDiSi/blob/master/doc/vis.png">A Screen shot of the WiDiSi</a></p>
+
+<p><a href="https://github.com/nasser1941/WiDiSi/blob/master/doc/02.png">Another Screen shot with the control panel</a></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/nasser1941/WiDiSi">WiDiSi</a> is maintained by <a href="https://github.com/nasser1941">nasser1941</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
