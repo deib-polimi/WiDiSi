@@ -25,7 +25,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import applications.Simulator;
+import peerSimEngine.Simulator;
 
 
 // TODO: Auto-generated Javadoc

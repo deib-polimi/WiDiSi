@@ -61,7 +61,7 @@ public class WiFiServiceDiscoveryActivity implements EDProtocol, CDProtocol,
 ConnectionInfoListener, DnsSdServiceResponseListener, DnsSdTxtRecordListener, PeerListListener, Callback,GroupInfoListener, 
 BroadcastReceiver{
 
-	public static final String 	SERVICE_REG_TYPE 		= "_presence._tcp"; // this is registeration type for services
+	public static final String 	SERVICE_REG_TYPE 		= "_presence._tcp"; // this is registration type for services
 
 	public static final int 	MESSAGE_READ 			= 0x400 + 1;		// Reserved Code for Message Handler 
 	public static final int 	MY_HANDLE 				= 0x400 + 2;		// Reserved Code for Message Handler
@@ -74,7 +74,6 @@ BroadcastReceiver{
 	public static final int		REQUEST_CONNECT_AP		= 0x400 + 9;		// Reserved Code for Message Handler
 	public static final int		ROUTING_MESSAGE			= 0x400 + 10;		// Reserved Code for Message Handler
 
-	private static final int	wTimeForWTA				= 10;				// period (seconds) in which the GO decide a new combination based on new clients added or removed
 	private boolean				startWTAClaculation;
 	public static final int 	waitcoeff 				= 300;				// Waiting time will be multiply by this coefficient (milliseconds)
 	public static final int 	SERVER_PORT 			= 4545;				// Server port is the same in GroupOwnerSocketHandler
@@ -82,10 +81,10 @@ BroadcastReceiver{
 
 	// None constant variables
 	public 	int 		count;
-	public 	int 		groupCapacity;		// will be increamented by one for each new peer in the group
+	public 	int 		groupCapacity;		// will be incremented by one for each new peer in the group
 	public 	boolean 	discoveryFlag;	
-	public 	boolean 	isWifiP2pEnabled;	// would be set to true by Broadcast receiver when the wifi P2P enabled
-	public 	boolean 	isGroupOwner;		// would be set to true by ConnectionInfoListener when connection info avilable
+	public 	boolean 	isWifiP2pEnabled;	// would be set to true by Broadcast receiver when the WiFi P2P enabled
+	public 	boolean 	isGroupOwner;		// would be set to true by ConnectionInfoListener when connection info available
 	public 	boolean 	isConnected;    	// would be set to true by Broadcast receiver when the device state changed
 	private boolean 	SMARTSelected;
 	public 	double   	intention;			// The intention of this device. we may set it once to save memory instead of calling getIntention() method several times
@@ -105,10 +104,10 @@ BroadcastReceiver{
 	public static final int AVAILABLE   = 3;
 	public static final int UNAVAILABLE = 4;
 
-	// Objetc definitions
+	// Object definitions
 	private 		WifiP2pManager 				manager;
 	private			WifiManager 				wifiManager;
-	private 	 	WifiP2pConfig 				config; 			  		// configuration of wifi p2p. here for WPS configuration
+	private 	 	WifiP2pConfig 				config; 			  		// configuration of Wifi p2p. here for WPS configuration
 	private			Group						newGroup;					// The current group if this device is GO. Otherwise it will return null
 	private 		wifiP2pService			 	serviceGroup;
 	private 		nodeP2pInfo					nodeInfo;
@@ -116,9 +115,8 @@ BroadcastReceiver{
 	private 		boolean						delayHandler1Started, delayHandler2Started, delayHandler3Started, delayHandler4Started;
 
 	// Collections									
-	private HashMap<String, Double> 			intentionList;  			// Intention	<=>	Device Mac Address
-	private HashMap<String, String> 			serviceList;  				// Device Mac Address <=> Service Name
-	//private HashMap<String, String> 			groupList;  				// Group ID   <=> Mac Address of GO
+	private HashMap<String, Double> 			intentionList;  			// Intention	<=>	Device MAC Address
+	private HashMap<String, String> 			serviceList;  				// Device MAC Address <=> Service Name
 	private ArrayList<WifiP2pDevice> 			peerList; 					// WifiP2pDevice of peers found in the proximity
 	private ArrayList<WifiP2pDevice> 			groupedPeerList; 			// WifiP2pDevice of peers in the group  
 	private ArrayList<Node> 					chatClientList;
@@ -273,7 +271,6 @@ BroadcastReceiver{
 		}
 	}
 
-
 	@Override
 	public void nextCycle(Node node, int pid) {
 		thisNode = node;
@@ -281,37 +278,20 @@ BroadcastReceiver{
 		if (cycle == 1){
 
 
-			// Initiallizing wifiP2P manager, Channel and Broadcast receiver and registering the receiver
+			// initializing wifiP2P manager, Channel and Broadcast receiver and registering the receiver
 			manager = (WifiP2pManager) node.getProtocol(wifip2pmanagerPid);
 			wifiManager = (WifiManager) node.getProtocol(wifimanagerPid);
 			nodeInfo = (nodeP2pInfo) node.getProtocol(p2pInfoPid);
 
-			//handler 			= new Handler(this);
 			config 				= new WifiP2pConfig();  			// configuration of wifi p2p. here for WPS configuration
 			newGroup			= new Group();						// The current group if this device is GO. Otherwise it will return null
 			intentionList 		= new HashMap<String, Double>();  	// Intention	<=>	Device Mac Address
 			serviceList 		= new HashMap<String, String>();  	// Device Mac Address <=> Service Name
-			//groupList 			= new HashMap<String, String>();  	// Group ID   <=> Mac Address of GO
 			peerList 			= new ArrayList<WifiP2pDevice>(); 	// WifiP2pDevice of peers found in the proximity
 			groupedPeerList 	= new ArrayList<WifiP2pDevice>(); 	// WifiP2pDevice of peers in the group  
-			//serverThreads		= new ArrayList<GroupOwnerSocketHandler>(); // each client need a seprate thread and socket
-			//chatClientList		= new ArrayList<ChatManager>();  	 // List of ChatManagers. A chatManager Object is needed for each client to send message
 			chatClientList		= new ArrayList<Node>(); 
 			macAddressList  	= new ArrayList<String>();
 			WTAList 			= new ArrayList<WTAClass>();
-
-
-			//			statusTxtView = (TextView) findViewById(R.id.status_text);         	//Status text at the bottom of main activity        
-			//			statusTxtView.setMovementMethod(new ScrollingMovementMethod());	   	// making Status text view scrollable
-			//			statusTxtView.setScrollbarFadingEnabled(false);					  	// Set the Scroll bar visible all the time        
-
-			// Adding necessar change action to the intent filter
-			//			intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-			//			intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-			//			intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-			//			intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-			//			intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-
 
 			/*
 			 * Register listeners. These are callbacks invoked
@@ -326,14 +306,10 @@ BroadcastReceiver{
 			wifiManager.registerHandler(this);
 			wifiManager.startScan();
 
-			// Configure the Intention and WPS in wifi P2P
-			//Random r = new Random();
-
 			// In this simulator the Intention value has been already fixed at the NodeP2pInfo class. We have not using the intention parameter in Configuration file in this simulator -- later I will fix this
 			config.groupOwnerIntent = nodeInfo.getGoIntentionValue();
 			// WPS in this simulator is always PBC -- it has been just modeled by a fix delay
 			config.wps = "PBC";
-
 			//p2pMacAddress = Utils.getMACAddress("p2p0");
 			p2pMacAddress = nodeInfo.getMacAddress();
 			// Calculating the intention and Putting the Intention of this device inside the intention List
@@ -341,7 +317,6 @@ BroadcastReceiver{
 			intentionList.put(p2pMacAddress, intention);
 
 			// Calling the first method in this activity
-			//Visualizer.print("Cycle 1 on Node: " + node.getID() + " is finished");
 			startRegistrationAndDiscovery();
 		}
 
@@ -356,11 +331,7 @@ BroadcastReceiver{
 		}
 
 		if(delayHandler2Started && cycle == delayHandler2){
-			if (!proximityGroupList.isEmpty() && !isConnected){      // if there are some groups around send request to join          		                  			
-				//				for (Entry<String, String> groupentry : groupList.entrySet()) {
-				//					appendStatus("Invitation sent to Group: " + groupentry.getKey());
-				//					connecPeer(groupentry.getValue());
-				//				}
+			if (!proximityGroupList.isEmpty() && !isConnected){      // if there are some groups around send request to join 
 				for(WifiP2pDevice device: proximityGroupList){
 					appendStatus("Invitation sent to Group: " + device.deviceAddress);
 					connecPeer(device.deviceAddress);
@@ -389,8 +360,19 @@ BroadcastReceiver{
 			delayHandler4Started = false;
 		}
 
-		// if WTA calculation requested: decide the group connection every 10 seconds
-		if(isGroupOwner && startWTAClaculation && cycle%((wTimeForWTA*1000)/NodeMovement.CycleLenght)==0){
+		// request the AP seen from each client every 10 seconds
+		if(isGroupOwner && cycle%((10*1000)/NodeMovement.CycleLenght)==0){
+			callbackMessage newMessage = new callbackMessage();
+			newMessage.what = MESSAGE_READ;
+			newMessage.arg1 = REQUEST_AP_SEEN;
+			newMessage.obj = p2pMacAddress;
+			for(WifiP2pDevice reciever: groupedPeerList){
+				manager.send(newMessage, reciever.deviceAddress); 
+			}
+		}
+
+		// Decide the group connection every 15000 mili-seconds
+		if(isGroupOwner && cycle%((15*1000)/NodeMovement.CycleLenght)==0){
 			startWTAClaculation = false;
 			decideGroupConnection(WTAList);
 		}
@@ -403,24 +385,22 @@ BroadcastReceiver{
 			emptyGroupTimerReached = 0;
 
 			if(!proximityGroupList.isEmpty()){
-				//Visualizer.print("empty group with groups around. Node: " + node.getID() + " connection to Node: " +proximityGroupList.get(0).deviceAddress);
 				manager.removeGroup();
 				// getting the first group in the list
-				//config.deviceAddress = groupList.get((String) groupList.keySet().toArray()[0]);
 				config.deviceAddress = proximityGroupList.get(0).deviceAddress;
 				manager.connect(config);
 			}
 		}else{
 			emptyGroupTimerReached = 0;
 		}
-
-		if((cycle==200) || (cycle>400 && cycle%60==0)){  //(cycle>220 && cycle%30==0)
+		
+		if((cycle==200) || (cycle>400 && cycle%60==0)){
 			if(node.getID()==195){
 				RouteAodv route = (RouteAodv) node.getProtocol(routaodvPid);
 				applications.magnet.Routing.Message newIpMessage = new MessageBytes("Hello " + node.getID() + "-" + cycle);
-				
+
 				// create source address
-				
+
 				byte[] srcIpAddr = new byte[]{0, 0, 0, 0};
 				if(node.getID()<255){
 					srcIpAddr = new byte[]{10, 0, 0, (byte)node.getID()};
@@ -437,15 +417,13 @@ BroadcastReceiver{
 					NetAddress dst = new NetAddress (dstIpAddr);
 					NetMessage.Ip ipMsg = new NetMessage.Ip(newIpMessage, src, dst, Constants.NET_PROTOCOL_AODV, Constants.NET_PRIORITY_NORMAL, RouteAodv.TTL_START);
 					ipMsg.setLastHopMacAddress(new MacAddress((int)node.getID()));
-					//System.out.println("Request IP message sending from: " + src.getIP().toString() + " to: " + dst.getIP().toString() + " at cycle: " + cycle);
+					System.out.println("Request IP message sending from: " + src.getIP().toString() + " to: " + dst.getIP().toString() + " at cycle: " + cycle);
 					route.send(ipMsg);
 					}
-				//cycletimr = cycle;
 			}
 		}
 		cycle++;
 	}
-	
 
 	//Registers a local service and then initiates a service discovery    
 	private void startRegistrationAndDiscovery() {
@@ -479,7 +457,7 @@ BroadcastReceiver{
 	public void onDnsSdTxtRecordAvailable(String fullDomainName, Map<String, String> record, WifiP2pDevice srcDevice) {
 		appendStatus(String.valueOf(srcDevice.deviceName + " " + record.get("Intention")));
 		// Put this new Record in the intention List
-		  intentionList.put(srcDevice.deviceAddress, Double.parseDouble(record.get("Intention")));
+		intentionList.put(srcDevice.deviceAddress, Double.parseDouble(record.get("Intention")));
 	}
 
 	// Start Discovery
@@ -494,7 +472,7 @@ BroadcastReceiver{
 	}
 
 	// This method actually will be called when the related view has been clicked on the fragment. 
-	// But to make the click autonamous, I have also start this method after couple of seconds by passing "MAGNET" to it
+	// But to make the click autonomous, I have also start this method after couple of seconds by passing "MAGNET" to it
 	// which means I mimic the click scenario
 	public void connectP2p(WiFiP2pService service) {
 
@@ -504,12 +482,12 @@ BroadcastReceiver{
 		}else if (service.instanceName.equals("MAGNET")){
 			//Finding the maximum intention inside the intentionList HashMap
 			String deviceMaxIntention = null;
-            double maxValueInMap=(Collections.max(intentionList.values())); // This will return max value in the Hashmap
-            for (Map.Entry<String, Double> entry : intentionList.entrySet()) {  // Itrate through hashmap
-                if (entry.getValue()==maxValueInMap) {
-                    deviceMaxIntention = entry.getKey();     				// find the device name with the max intention
-                }
-            }
+			double maxValueInMap=(Collections.max(intentionList.values())); // This will return max value in the Hashmap
+			for (Map.Entry<String, Double> entry : intentionList.entrySet()) {  // Itrate through hashmap
+				if (entry.getValue()==maxValueInMap) {
+					deviceMaxIntention = entry.getKey();     				// find the device name with the max intention
+				}
+			}
 
 			//Check to see whether this device has the highest Intention
 			//If this device has the highest intention it will create a group
@@ -621,11 +599,11 @@ BroadcastReceiver{
 		for (Iterator<Entry<String, Double>> itr = intentionList.entrySet().iterator(); itr.hasNext();)
 		{
 			Map.Entry<String, Double> entrySet = (Entry<String, Double>) itr.next();
-			 String Key = entrySet.getKey();
-	            if (!macAddressList.contains((Key)))
-	            {
-	                itr.remove();
-	            }
+			String Key = entrySet.getKey();
+			if (!macAddressList.contains((Key)))
+			{
+				itr.remove();
+			}
 		}
 		intentionList.put(p2pMacAddress, intention);  // adding the Intention of this device again because it was remove at the above procedure
 
@@ -712,7 +690,7 @@ BroadcastReceiver{
 
 	}
 
-	//Updating list of wifi APs
+	//Updating list of WiFi APs
 	public void updateWifiAPs(){
 		//Visualizer.print("Update WIFI AP");
 		List<ScanResult> wifiScanResults = new ArrayList<ScanResult>();
@@ -808,7 +786,7 @@ BroadcastReceiver{
 		return MAC;
 	}
 
-	// Here Group Owner decieds intelligently and tell each client to connect to what other APs(GOs)
+	// Here Group Owner decides intelligently and tell each client to connect to what other APs(GOs)
 	private void decideGroupConnection(List<WTAClass> interfaceList){
 
 		//remove the current group owner (this Node) from the scanresultlists
@@ -1099,19 +1077,9 @@ BroadcastReceiver{
 			appendStatus("Group Record Updated " + String.valueOf(newGroup.getGroupID()));
 			groupRecordUpdated = true;
 		}
-
-		//		for(Node tempDevice: group.getNodeList()){
-		//			nodeP2pInfo tempDeviceInfo = (nodeP2pInfo) tempDevice.getProtocol(p2pInfoPid);
-		//			callbackMessage newMessage = new callbackMessage();
-		//			newMessage.what = MY_HANDLE;
-		//			newMessage.obj = nodeInfo.getMacAddress();
-		//			String receiverAdd = tempDeviceInfo.getMacAddress();
-		//			manager.send(newMessage, receiverAdd);
-		//		}
-
 	}
 
-	// when two devices (one group owner and one is client) connecting to each other the firsl message that is exchanging between thme is MY_HANDLE message. Here we undesrtand that the client is connected or the group owner has a new client
+	// when two devices (one group owner and one is client) connecting to each other the first message that is exchanging between them is MY_HANDLE message. Here we undesrtand that the client is connected or the group owner has a new client
 	@Override
 	public void handleMessage(callbackMessage msg) {
 		if(msg==null)

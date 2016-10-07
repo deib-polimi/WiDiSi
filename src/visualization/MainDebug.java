@@ -174,7 +174,7 @@ public class MainDebug {
 		minNodeSpeed.setBounds(178, 150, 86, 20);
 		frame.getContentPane().add(minNodeSpeed);
 		
-		JLabel lblNoOfConnected = new JLabel("No. of Connected Nodes");
+		JLabel lblNoOfConnected = new JLabel("Average Connected(%)");
 		lblNoOfConnected.setBounds(10, 178, 139, 14);
 		frame.getContentPane().add(lblNoOfConnected);
 		
@@ -245,7 +245,7 @@ public class MainDebug {
 		avShortestPath.setBounds(383, 125, 63, 20);
 		frame.getContentPane().add(avShortestPath);
 		
-		JLabel lblFree_1 = new JLabel("Shortest Path Count");
+		JLabel lblFree_1 = new JLabel("Sh Path Count");
 		lblFree_1.setBounds(271, 147, 106, 14);
 		frame.getContentPane().add(lblFree_1);
 		
@@ -256,7 +256,7 @@ public class MainDebug {
 		shortestPathCount.setBounds(383, 150, 63, 20);
 		frame.getContentPane().add(shortestPathCount);
 		
-		JLabel lblNa = new JLabel("N/A");
+		JLabel lblNa = new JLabel("Connectivity (%)");
 		lblNa.setBounds(271, 175, 106, 14);
 		frame.getContentPane().add(lblNa);
 		
@@ -266,7 +266,7 @@ public class MainDebug {
 		textField_14.setBounds(383, 175, 63, 20);
 		frame.getContentPane().add(textField_14);
 		
-		JLabel lblNa_1 = new JLabel("N/A");
+		JLabel lblNa_1 = new JLabel("Con Average (%)");
 		lblNa_1.setBounds(271, 197, 106, 14);
 		frame.getContentPane().add(lblNa_1);
 		
@@ -544,7 +544,6 @@ public class MainDebug {
 				singleNodeMov.setText(null);
 				anyNodeMove.setSelected(false);
 				singleNodeSel.setSelected(false);
-				
 			}
 		});
 		btnLoad.setBounds(10, 490, 89, 23);
@@ -554,6 +553,8 @@ public class MainDebug {
 		btnSet.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				Visualizer.connectivityAvg = 0;
+				Visualizer.connValNum = 0;
 				NodeMovement.CycleLenght = Double.parseDouble(cycleLengthControl.getText());
 				NodeMovement.FieldLength = Double.parseDouble(fieldLengthControl.getText());
 				NodeMovement.radio = Double.parseDouble(radioRangeControl.getText());

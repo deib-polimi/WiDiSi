@@ -33,10 +33,16 @@ To run the example following steps should be taken:
 
 3-	Modify the configuration text (wifip2pconfig.txt) file inside the configuration folder to change all settings of the network if needed
 
-4-	Pass the path of this configuration file as an argument to the main class by right clicking on the project => Run As=> Run Configurations => (x)Arguments --- and put the following arguments in the Program Arguments: â€œconfiguration\\wifip2pconfig.txtâ€ 
+4-	Pass the path of this configuration file as an argument to the main class by right clicking on the project => Run As=> Run Configurations => (x)Arguments --- and put the following arguments in the Program Arguments: “configuration\\wifip2pconfig.txt” 
 
 5-	Run the simulator
 
 6-	If asking which simulator to run, choose the class inside the WiFi direct package.
 
 7- You can change the control parameters like the speed of node movement or the number of nodes in the control panel. First, modify the value and then push SET once for the values to take effect.
+
+[A Live Demo](https://github.com/nasser1941/WiDiSi/blob/master/doc/01.avi)
+
+[Screen Shot 1](https://github.com/nasser1941/WiDiSi/blob/master/doc/02.png)
+
+[Screen Shot 2: Roles](https://github.com/nasser1941/WiDiSi/blob/master/doc/vis.png)

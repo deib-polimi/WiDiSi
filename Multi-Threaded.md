@@ -28,4 +28,3 @@ public void nextCycle(Node node, int pid)
 cycle++;
 }
 Now whenever we are interested in starting the runnable, we only need to make flag=true. This will make the counter counts for (2000/CycleLength) cycles that would be equal to 2000 ms and then execute the code.
-

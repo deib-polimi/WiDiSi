@@ -1,7 +1,7 @@
 s######################################################################################################
 ########### Simulation parameters ######################
 random.seed 		1234567890
-network.size 		200
+network.size 		250
 
 ######Simulation.endtime could be the number of cycles for controls
 simulation.endtime 	9000000
@@ -9,8 +9,8 @@ simulation.logtime 	100
 simulation.experiments 1
 
 #Network Dynamic
-MIN_NET_SIZE 		200
-MAX_NET_SIZE 		200
+MIN_NET_SIZE 		250
+MAX_NET_SIZE 		250
 NET_ADD_STEP 		1
 SIN_PERIOD 			10000
 NET_ADD_CYCLE_START 1

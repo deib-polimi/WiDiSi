@@ -1,16 +1,16 @@
 ######################################################################################################
 ########### Simulation parameters ######################
 random.seed 		1234567890
-network.size 		200
+network.size 		250
 
 ######Simulation.endtime could be the number of cycles for controls
 simulation.endtime 	9000000
-simulation.logtime 	100
+simulation.logtime 	200
 simulation.experiments 1
 
 #Network Dynamic
-MIN_NET_SIZE 		200
-MAX_NET_SIZE 		200
+MIN_NET_SIZE 		250
+MAX_NET_SIZE 		250
 NET_ADD_STEP 		1
 SIN_PERIOD 			10000
 NET_ADD_CYCLE_START 1
@@ -27,6 +27,22 @@ Internal_Processing_Delay 	5
 ######################################################################################################
 #############    INITIALIZERS    #######################
 
+########### Ordering the initializer execution #########
+order.init 		initnode, initcord, rnd, sch
+
+########### Node info initializer  #####################
+init.initnode nodeInitializer
+{
+	protocol_1 		nodinf
+	protocol_3 		p2pmanager
+}
+
+########### coordination initializer ####################
+init.initcord CoordinateInitializer
+{
+	protocol 		intcord
+}
+
 ########### wiring initializer #########################
 init.rnd wifidirect.nodemovement.WireInetTopology
 {
@@ -35,26 +51,10 @@ init.rnd wifidirect.nodemovement.WireInetTopology
 	undirected 		true
 }
 
-########### cordination initializer ####################
-init.initcord CoordinateInitializer
-{
-	protocol 		intcord
-}
- 
-########### Node info initializer  #####################
-init.initnode nodeInitializer
-{
-	protocol_1 		nodinf
-	protocol_3 		p2pmanager
-}
-
 ########### CDScheduler on EDSimulator #################
 init.sch CDScheduler
 init.sch.protocol test1 proob wifimanager aodv
 init.sch.randstart
-
-########### Ordering the initializer execution #########
-order.init 		initnode, initcord, rnd, sch
 
 ######################################################################################################
 #############    CONTROLS    ###########################

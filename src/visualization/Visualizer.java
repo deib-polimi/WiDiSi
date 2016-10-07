@@ -40,6 +40,7 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -64,11 +65,11 @@ import javax.swing.JTextArea;
 
 import javax.swing.border.EmptyBorder;
 
-import org.gephi.data.attributes.api.AttributeColumn;
 import org.gephi.data.attributes.api.AttributeController;
 import org.gephi.data.attributes.api.AttributeModel;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.io.exporter.api.ExportController;
 import org.gephi.io.exporter.preview.PNGExporter;
 import org.gephi.io.importer.api.Container;
@@ -193,6 +194,8 @@ public class Visualizer implements Control{
 
 	public static MainDebug mDwindow;
 
+	public static double connectivityAvg = 0;
+	public static long connValNum = 0;
 	/**
 	 * Instantiates a new visualizer.
 	 *
@@ -270,7 +273,7 @@ public class Visualizer implements Control{
 			mDwindow.maxNodeSpeed.setText(String.valueOf(maxspeed));
 			mDwindow.minNodeSpeed.setText(String.valueOf(minspeed));
 
-			long connectedDevices = 0;
+			double connectedDevices = 0;
 			long noGroups = 0;
 			int maxClient = 0;
 			int maxNeighbor = 0;
@@ -313,7 +316,7 @@ public class Visualizer implements Control{
 
 			mDwindow.netSize.setText(String.valueOf(Network.size()));
 			mDwindow.numGroups.setText(String.valueOf(noGroups));
-			mDwindow.numConnectedNodes.setText(String.valueOf(connectedDevices));
+			mDwindow.numConnectedNodes.setText(String.valueOf((connectedDevices/Network.size())*100));
 			mDwindow.numclients.setText(String.valueOf(maxClient));
 			mDwindow.maxNeighbor.setText(String.valueOf(maxNeighbor));
 			mDwindow.curCycle.setText(String.valueOf(CommonState.getTime()));	
@@ -333,9 +336,14 @@ public class Visualizer implements Control{
 	public void showImage(ByteArrayOutputStream baos){
 		byte[] png = baos.toByteArray();
 		try {
-
+	
 			image = ImageIO.read(new ByteArrayInputStream(png));
-
+			/*// Write image to file 
+			BufferedImage biImage = (BufferedImage)image;
+			File f = new File("./screenshots/" + cycle + ".png");
+			ImageIO.write(biImage, "png", f);
+			*/
+			
 			//label.setAutoscrolls(true);
 			if(frame==null){
 
@@ -747,9 +755,9 @@ public class Visualizer implements Control{
 					nodeColor.setG(0);
 					nodeColor.setR(0);	
 				}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()==CONNECTED &&  nodeInfo.getStatus()==CONNECTED){
-					nodeColor.setB(100);
+					nodeColor.setB(0);
 					nodeColor.setG(0);
-					nodeColor.setR(0);	
+					nodeColor.setR(255);	
 				}else if(!nodeInfo.isGroupOwner() && wifiManager.getWifiStatus()!=CONNECTED && nodeInfo.getStatus()==CONNECTED){
 					nodeColor.setB(254);
 					nodeColor.setG(0);
@@ -950,16 +958,37 @@ public class Visualizer implements Control{
 		//Append imported data to GraphAPI
 		importController.process(container, new DefaultProcessor(), workspace);
 
+		
 		//Get graph model of current workspace
 		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();		
 		
-		EdgeBetweenness eBetween = new EdgeBetweenness();
-		eBetween.setDirected(false);
-		eBetween.doNormalize(true);
-		eBetween.execute(graphModel, attributeModel);
+		// Calculating the total shortest path available using DijkstraShortestPathAlgorithm
+		long pathCounter = 0;
+		GraphController gc = Lookup.getDefault().lookup(GraphController.class);
+		org.gephi.graph.api.Graph undiGephiGraph = gc.getModel().getGraphVisible();
+		for (org.gephi.graph.api.Node sourceNode : undiGephiGraph.getNodes()){
+			DijkstraShortestPathAlgorithm dShPath = new DijkstraShortestPathAlgorithm (undiGephiGraph, sourceNode);
+			dShPath.compute();
+			for (org.gephi.graph.api.Node destNode : undiGephiGraph.getNodes()){
+				if (sourceNode.getId()==destNode.getId()){
+					continue;
+				}
+				double distance;
+				if ((distance = dShPath.getDistances().get(destNode)) != Double.POSITIVE_INFINITY){
+					pathCounter++;
+				}
+			}
+		}
+		
 		if(mDwindow!=null){
-			mDwindow.shortestPathCount.setText(String.valueOf(String.valueOf(eBetween.getEdgeBetweenness())));
+			mDwindow.shortestPathCount.setText(String.valueOf(pathCounter));
+			double netSize= (double)Network.size();
+			connValNum++;
+			double connectivityPresent = ((double)pathCounter/(netSize*(netSize-1)))*100;
+			connectivityAvg = (connectivityAvg + connectivityPresent);
+			mDwindow.textField_14.setText(String.valueOf(connectivityPresent));
+			mDwindow.textField_15.setText(String.valueOf(connectivityAvg/connValNum));
 		}
 				
 		GraphDistance gDistance = new GraphDistance();
@@ -1026,7 +1055,7 @@ public class Visualizer implements Control{
 	 */
 	public static void print(Object ob, Color color) {
 		if(output!=null){
-			//output.setCaretColor(color);
+			output.setCaretColor(color);
 			
 			output.append("\n" + ob);
 			output.setForeground(color);

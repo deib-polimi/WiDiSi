@@ -27,7 +27,6 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.dynamics.NodeInitializer;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class nodeInitializer.
  */
@@ -75,9 +74,9 @@ public class nodeInitializer implements NodeInitializer, Control{
 		p2pmanager.thisPid = p2pManagerPid;
 		p2pmanager.setDeviceName("Device_" + n.getID());
 	}
-	// Control Interface implementation. This method will be executed Network.size() times at the beggining of network formation
+	// Control Interface implementation. This method will be executed Network.size() times at the first step of network formation
 	// to initialize the nodes. It would execute after that. instead for each new node which will be added later by Dynamics class
-	// the above mentioned method will be excuted once to initialize the node
+	// the above mentioned method will be executed once to initialize the node
 	/* (non-Javadoc)
 	 * @see peersim.core.Control#execute()
 	 */
