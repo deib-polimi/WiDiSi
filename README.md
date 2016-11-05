@@ -47,4 +47,4 @@ To run the example following steps should be taken:
 
 [Screen Shot 1](https://github.com/nasser1941/WiDiSi/blob/master/shoppingMall.png)
 
-[Screen Shot 2: Roles](https://github.com/nasser1941/WiDiSi/blob/master/doc/vis.png)
+[Screen Shot 2: Roles](https://github.com/nasser1941/WiDiSi/blob/master/simulator.png)
