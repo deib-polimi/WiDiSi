@@ -41,6 +41,8 @@ To run the example following steps should be taken:
 
 7- You can change the control parameters like the speed of node movement or the number of nodes in the control panel. First, modify the value and then push SET once for the values to take effect.
 
+[The published paper](http://ieeexplore.ieee.org/document/7565169/)
+
 [A Live Demo](https://github.com/nasser1941/WiDiSi/blob/master/doc/01.avi)
 
 [Screen Shot 1](https://github.com/nasser1941/WiDiSi/blob/master/doc/02.png)
