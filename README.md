@@ -16,7 +16,7 @@ The other functionalities in WiFi Direct specification like Authentication, Encr
 
 1- SwitchingDelay is caused by switching the channels during the search phase. It represents the average time that two peers take to find a common channel;
 
-2- ChannelDelay mimics the time needed for the physical propagation of signals. It is the amount of time needed to ``successfully'' exchange one frame between two peers at the MAC layer;
+2- ChannelDelay mimics the time needed for the physical propagation of signals. It is the amount of time needed to successfully exchange one frame between two peers at the MAC layer;
 
 3- AuthenticationDelay is the user-dependent delay for authentication. It is the amount of time needed for the user to accept an invitation and perform the provisioning phase;
 
@@ -33,7 +33,7 @@ To run the example following steps should be taken:
 
 3-	Modify the configuration text (wifip2pconfig.txt) file inside the configuration folder to change all settings of the network if needed
 
-4-	Pass the path of this configuration file as an argument to the main class by right clicking on the project => Run As=> Run Configurations => (x)Arguments --- and put the following arguments in the Program Arguments: “configuration\\wifip2pconfig.txt” 
+4-	Pass the path of this configuration file as an argument to the main class by right clicking on the project => Run As=> Run Configurations => (x)Arguments --- and put the following arguments in the Program Arguments: â€œconfiguration\\wifip2pconfig.txtâ€ 
 
 5-	Run the simulator
 
