@@ -1,6 +1,12 @@
 ######################################################################################################
 ########### Simulation parameters ######################
+
+#setting a random seed number for the Random method. Since this number is constant, every time you run the simulator, 
+# you will get the same random numbers as before. This will help keeping the environment unchanged while changing one parameter
+# to measure its effect. To make a real random value, you should set the current system time as a seed number. However, this cannot be done via configuration file. it should be modified manulaly inside the relavant class.
 random.seed 		1234567890
+
+# This parameter define the number of nodes inside the network
 network.size 		130
 
 ######Simulation.endtime could be the number of cycles for controls
