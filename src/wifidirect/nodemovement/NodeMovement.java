@@ -77,7 +77,7 @@ public class NodeMovement implements Control{
 	public static double SpeedMx = 0; //  m/s
 	public static double radio = 200; //  meters
 	/**
-	 * Instantiates a new node movement.
+	 * Instantiates a new node movement in peersim.
 	 *
 	 * @param prefix the prefix
 	 */
@@ -92,7 +92,7 @@ public class NodeMovement implements Control{
 	/* (non-Javadoc)
 	 * @see peersim.core.Control#execute()
 	 */
-	// A node moves in the same direction for 5 cycles and then change it's direction
+	// A node moves in the same direction for 200 cycles and then change it's direction
 	@Override
 	public boolean execute() {
 		int minusY = 0; 
@@ -105,30 +105,51 @@ public class NodeMovement implements Control{
 		maxspeed 	= (SpeedMx*10*CycleLenght)/FieldLength;
 		minspeed 	= (SpeedMn*10*CycleLenght)/FieldLength;
 		range 		= (radio/FieldLength);
-
+		
+		// if user asks to move all the nodes in the network:
 		if(anyNodeSel){
+			//iterate over all nodes in the network
 			for (int i=0; i<Network.size(); i++){
 				Node node = Network.get(i);
+				
+				// get the current coordinates of the this node
 				CoordinateKeeper coordinates = (CoordinateKeeper) node.getProtocol(coordinatesPid);
+				
+				//check if the node is mobile. otherwise, if the node is a fixed node (like a desktop PC), we should not move it
 				if(coordinates.isMobile()){
+					
+					// We want to keep the nodes move in the same direction for at least n cycles (here is 200)
+					// at the beginning we define a direction and put the node inside the moveFreq so that in the next 200 cycles we do not change the direction
+					// of the node
 					if(!moveFreq.containsKey(node.getID())){
-
+						
+						// the following two random boolean is used to change the direction of the nodes. if -1, the direction would be changed
 						minusY = CommonState.r.nextBoolean() ? 1 : -1;
 						minusX = CommonState.r.nextBoolean() ? 1 : -1;
+						
+						// We move the nodes based on a random speed between the max and min speed specified by the user. The direction of the node would be selected
+						// by the minusX and minusY. randX and randY shows how much a node should move from its current position. 
 						randX = (minusX * (minspeed + (maxspeed - minspeed) * CommonState.r.nextDouble())/10000);
 						randY = (minusY * (minspeed + (maxspeed - minspeed) * CommonState.r.nextDouble())/10000);
-						//randX = (minusX * ((double)(CommonState.r.nextInt((maxspeed - minspeed) + 1) + minspeed))/10000);
-						//randY = (minusY * ((double)(CommonState.r.nextInt((maxspeed - minspeed) + 1) + minspeed))/10000);
+						
+						// we add the above two movement parameters to the current coordinates of the node
 						tempY = randY + coordinates.getY();
 						tempX = randX + coordinates.getX();
+						
+						// we put the node inside the moveFreq to avoid changing the direction of this node in the next 200 cycles
 						moveFreq.put(node.getID(), new Container(randX, randY, 1));
+					
+					
 					}else{
+						// Now the nodes are inside the moveFreq, we keep the same direction for the next 200 cycles
 						if(moveFreq.get(node.getID()).movecount < 200){
 							Container newCon = moveFreq.get(node.getID());
 							newCon.movecount = moveFreq.get(node.getID()).movecount+1;
 							moveFreq.put(node.getID(), newCon);
 							tempY = newCon.randomY + coordinates.getY();
 							tempX = newCon.randomX + coordinates.getX();
+							
+						// We moved a node in the same direction for 200 cycles, now it is the time to change the direction randomly.
 						}else{
 
 							minusY = CommonState.r.nextBoolean() ? 1 : -1;
@@ -137,6 +158,7 @@ public class NodeMovement implements Control{
 							randY = (minusY * (minspeed + (maxspeed - minspeed) * CommonState.r.nextDouble())/10000);
 							tempY = randY + coordinates.getY();
 							tempX = randX + coordinates.getX();
+							// Then we put the node back inside the moveFreq to keep this new direction for the next 200 cycles and we repeat the procedure
 							moveFreq.put(node.getID(), new Container(randX, randY, 1));
 
 						}
@@ -154,6 +176,9 @@ public class NodeMovement implements Control{
 					}			
 				}
 			}
+			
+		// If use asked to move only a single node at runtime from the control panel. The procedure is similar to the moving all the nodes
+		// but here we do not iterate over all the nodes inside the network
 		}else if(singleNodeSel){
 			Node singleNodeMov = null;
 			for(int i=0; i<Network.size();i++){
@@ -206,7 +231,10 @@ public class NodeMovement implements Control{
 				}	
 			}
 		}
-
+		
+		// When node moves, their proximity nodes changes.
+		// This section id responsible to refresh the proximity members of each node based on the radio range of the nodes in the new condition
+		// You should not change this part. This section, independent of the types of node movement, update the neighbor list of the nodes.
 		if(singleNodeSel || anyNodeSel){
 			for(int i=0; i<Network.size(); i++){
 				// create a list of all new members for each node in the network
@@ -223,13 +251,13 @@ public class NodeMovement implements Control{
 						}
 					}
 				}
-				// Remove thoes previous neighbors which are not in the proximity of this node anymore			
+				// Remove those previous neighbors which are not in the proximity of this node anymore			
 				for(int k=0; k<linkable.degree(); k++){
 					if(!nodeList.contains(linkable.getNeighbor(k))){
 
-						// Now we have to check if the removed node has already been connectedto this Node or not if yes: the connection should be cancelled
-						// We only search for clients in order to prevent conjestion in sending cancel request so only the clients will check whether they are still inside the group owner proximity or not
-						// If not we should cencel the connection which will automatically put this device in the UNAVAILABLe status and send cancel request to the Group Owner
+						// Now we have to check if the removed node has already been connected this Node or not if yes: the connection should be cancelled
+						// We only search for clients in order to prevent congestion in sending cancel request so only the clients will check whether they are still inside the group owner proximity or not
+						// If not we should cancel the connection which will automatically put this device in the UNAVAILABLe status and send cancel request to the Group Owner
 						if(nodeInfo.getStatus()==CONNECTED && !nodeInfo.isGroupOwner() && nodeInfo.getGroupOwner()==linkable.getNeighbor(k)){
 							WifiP2pManager wifiManager = (WifiP2pManager) node.getProtocol(p2pmanagerId);
 							wifiManager.cancelConnect();
@@ -238,7 +266,7 @@ public class NodeMovement implements Control{
 				}
 
 				// plus we check if a single node is left connected (not group owner) and at the same time it is not inside the proximity of GO
-				// These phenamena is where we some some Blue (connected) node in the middle of no where
+				// These phenomena is where we some some Blue (connected) node in the middle of no where
 
 				if((nodeInfo.getStatus()==CONNECTED && !nodeInfo.isGroupOwner() && nodeInfo.getGroupOwner()!=null)){
 					boolean groupOwnerInside = false;

@@ -153,6 +153,7 @@ public class Simulator {
 	 */
 	public static void main(String[] args) throws NullPointerException
 	{
+		/**
 		File directory = new File("log");
 		try {
 			FileUtils.cleanDirectory(directory);
@@ -160,6 +161,7 @@ public class Simulator {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		} 
+		*/
 		long time = System.currentTimeMillis();	
 
 		System.err.println("Simulator: loading configuration");

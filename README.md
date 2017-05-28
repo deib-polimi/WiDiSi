@@ -37,7 +37,7 @@ To run the example following steps should be taken:
 
 5-	Run the simulator
 
-6-	If asking which simulator to run, choose the class inside the WiFi direct package.
+6-	If asking which simulator to run, choose the class inside the peerSimEngine package.
 
 7- You can change the control parameters like the speed of node movement or the number of nodes in the control panel. First, modify the value and then push SET once for the values to take effect.
 
