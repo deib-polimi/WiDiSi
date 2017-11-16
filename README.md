@@ -48,3 +48,6 @@ To run the example following steps should be taken:
 [Screen Shot 1](https://github.com/nasser1941/WiDiSi/blob/master/shoppingMall.png)
 
 [Screen Shot 2: Roles](https://github.com/nasser1941/WiDiSi/blob/master/simulator.png)
+
+
+__This project is finished and I am not updating this repository anymore. However, if you have any question please open an issue and I will try to address it as soon as possible.__
